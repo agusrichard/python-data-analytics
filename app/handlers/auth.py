@@ -2,8 +2,8 @@ from http import HTTPStatus
 from sqlalchemy.exc import IntegrityError
 from flask import Blueprint, request, jsonify
 
-from services.auth import AuthService
-from common.exceptions import BadRequestException, NotFoundException
+from app.services.auth import AuthService
+from app.common.exceptions import BadRequestException, NotFoundException
 
 
 def init_auth_handlers(service: AuthService):

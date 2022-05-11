@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from repositories.auth import AuthRepository
-from common.exceptions import NotFoundException, BadRequestException
+from app.repositories.auth import AuthRepository
+from app.common.exceptions import NotFoundException, BadRequestException
 
 
 class AuthService:
@@ -11,7 +11,7 @@ class AuthService:
     def login(self, data: dict):
         user = self.repository.get_by_email(data["email"])
         if not user:
-            raise NotFoundException("User not found")
+            raise BadRequestException("Wrong email or password")
 
         if not user.check_password(data["password"]):
             raise BadRequestException("Wrong email or password")

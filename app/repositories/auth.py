@@ -1,7 +1,7 @@
 from typing import List
 from flask_sqlalchemy import SQLAlchemy
 
-from models.user import User
+from app.models.user import User
 
 
 class AuthRepository:
