@@ -12,12 +12,17 @@ def configure_auth(app: Flask, db: SQLAlchemy):
     from app.models.user import User
     from app.repositories.auth import AuthRepository
     from app.services.auth import AuthService
-    from app.handlers.auth import init_auth_handlers
+    from app.handlers.auth import create_auth_handlers
+    from app.configs.token import create_token_required_decorator
+
+    decorators = {
+        "token_required": create_token_required_decorator(app),
+    }
 
     # Configuring auth
     auth_repository = AuthRepository(db, User)
     auth_service = AuthService(auth_repository)
-    auth_handlers = init_auth_handlers(auth_service)
+    auth_handlers = create_auth_handlers(auth_service, decorators)
     app.register_blueprint(auth_handlers, url_prefix="/auth")
 
 

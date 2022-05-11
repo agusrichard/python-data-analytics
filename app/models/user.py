@@ -1,4 +1,6 @@
-from datetime import datetime
+import jwt
+from flask import current_app
+from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db
@@ -37,9 +39,9 @@ class User(db.Model):
             "email": self.email,
             "fullname": self.fullname,
             "bio": self.bio,
-            "last_login": self.last_login,
-            "created_at": self.created_at,
-            "updated_at": self.updated_at,
+            "last_login": self.last_login.isoformat(),
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
         }
 
     @classmethod
@@ -51,3 +53,11 @@ class User(db.Model):
         user = cls(**data)
 
         return user
+
+    def generate_token(self) -> str:
+        token = jwt.encode(
+            {"id": self.id, "exp": datetime.utcnow() + timedelta(days=1)},
+            current_app.config["SECRET_KEY"],
+            "HS256",
+        )
+        return token.decode("utf-8")

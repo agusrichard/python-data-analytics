@@ -1,13 +1,14 @@
 from http import HTTPStatus
 from sqlalchemy.exc import IntegrityError
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 
 from app.services.auth import AuthService
 from app.common.exceptions import BadRequestException, NotFoundException
 
 
-def init_auth_handlers(service: AuthService):
+def create_auth_handlers(service: AuthService, decorators: dict):
     blueprint = Blueprint("auth", __name__)
+    token_required = decorators["token_required"]
 
     @blueprint.route("/login", methods=["POST"])
     def login():
@@ -25,8 +26,9 @@ def init_auth_handlers(service: AuthService):
 
         try:
             data = request.json
-            service.login(data)
-            return "", HTTPStatus.NO_CONTENT
+            result = service.login(data)
+            print("result", result)
+            return jsonify(result), HTTPStatus.OK
         except BadRequestException as e:
             return jsonify(e.to_dict()), e.error_code
         except NotFoundException as e:
@@ -48,5 +50,10 @@ def init_auth_handlers(service: AuthService):
                 ),
                 HTTPStatus.CONFLICT,
             )
+
+    @blueprint.route("/profile", methods=["GET"])
+    @token_required
+    def profile(current_user):
+        return jsonify(current_user.to_dict())
 
     return blueprint
