@@ -5,12 +5,11 @@ from app.models.user import User
 
 
 class AuthRepository:
-    def __init__(self, db: SQLAlchemy, model: User):
+    def __init__(self, db: SQLAlchemy):
         self.db = db
-        self.model = model
 
     def create(self, data) -> None:
-        user = self.model.from_dict(data)
+        user = User.from_dict(data)
         self.db.session.add(user)
         self.db.session.commit()
 
@@ -26,10 +25,10 @@ class AuthRepository:
         self.db.session.commit()
 
     def get_all(self, limit: int = 10, offset: int = 0) -> List[User]:
-        return self.model.query.limit(limit).offset(offset).all()
+        return User.query.limit(limit).offset(offset).all()
 
     def get_by_id(self, id: int) -> User:
-        return self.model.query.get(id)
+        return User.query.get(id)
 
     def get_by_email(self, email: str) -> User:
-        return self.model.query.filter_by(email=email).first()
+        return User.query.filter_by(email=email).first()

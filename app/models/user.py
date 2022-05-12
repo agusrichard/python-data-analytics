@@ -30,7 +30,7 @@ class User(db.Model):
         return generate_password_hash(password)
 
     def __repr__(self) -> str:
-        return f"User('{self.username}', '{self.email}', '{self.fullname}')"
+        return f"User('{self.username}', '{self.email}')"
 
     def to_dict(self) -> dict:
         return {
@@ -39,9 +39,11 @@ class User(db.Model):
             "email": self.email,
             "fullname": self.fullname,
             "bio": self.bio,
-            "last_login": self.last_login.isoformat(),
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
+            "last_login": None
+            if self.last_login is None
+            else self.last_login.isoformat(),
         }
 
     @classmethod

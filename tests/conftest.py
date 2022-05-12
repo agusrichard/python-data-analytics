@@ -1,4 +1,6 @@
 import pytest
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 
 
 @pytest.fixture
@@ -15,10 +17,15 @@ def app():
 
 
 @pytest.fixture
-def db():
+def db(app: Flask):
     from app import db
 
     db.create_all()
     yield db
     db.session.remove()
     db.drop_all()
+
+
+@pytest.fixture
+def client(app: Flask, db: SQLAlchemy):
+    return app.test_client()

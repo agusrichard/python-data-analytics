@@ -1,59 +1,25 @@
-from http import HTTPStatus
-from sqlalchemy.exc import IntegrityError
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request
 
-from app.services.auth import AuthService
-from app.common.exceptions import BadRequestException, NotFoundException
+from app.common.token import token_required
+from app.controllers.auth import AuthController
 
 
-def create_auth_handlers(service: AuthService, decorators: dict):
+def create_auth_handlers(controller: AuthController):
     blueprint = Blueprint("auth", __name__)
-    token_required = decorators["token_required"]
 
     @blueprint.route("/login", methods=["POST"])
     def login():
         data = request.json
-        if "email" not in data or "password" not in data:
-            return (
-                jsonify(
-                    {
-                        "message": "Email and password are required",
-                        "error_code": HTTPStatus.BAD_REQUEST,
-                    }
-                ),
-                HTTPStatus.BAD_REQUEST,
-            )
-
-        try:
-            data = request.json
-            result = service.login(data)
-            print("result", result)
-            return jsonify(result), HTTPStatus.OK
-        except BadRequestException as e:
-            return jsonify(e.to_dict()), e.error_code
-        except NotFoundException as e:
-            return jsonify(e.to_dict()), e.error_code
+        return controller.login(data)
 
     @blueprint.route("/register", methods=["POST"])
     def register():
-        try:
-            data = request.json
-            service.register(data)
-            return "", HTTPStatus.CREATED
-        except IntegrityError:
-            return (
-                jsonify(
-                    {
-                        "message": "User already exists",
-                        "error_code": HTTPStatus.CONFLICT,
-                    }
-                ),
-                HTTPStatus.CONFLICT,
-            )
+        data = request.json
+        return controller.register(data)
 
     @blueprint.route("/profile", methods=["GET"])
     @token_required
     def profile(current_user):
-        return jsonify(current_user.to_dict())
+        return controller.profile(current_user)
 
     return blueprint
