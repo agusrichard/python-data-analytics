@@ -1,6 +1,6 @@
 from flask import jsonify, Request
 from http import HTTPStatus
-from sqlite3 import IntegrityError
+from sqlalchemy.exc import IntegrityError
 
 from app.services.auth import AuthService
 from app.common.exceptions import BadRequestException, NotFoundException
@@ -10,7 +10,8 @@ class AuthController:
     def __init__(self, service: AuthService):
         self.service = service
 
-    def login(self, data: dict):
+    def login(self, request: Request):
+        data = request.json
         if "email" not in data or "password" not in data:
             return (
                 jsonify(
@@ -27,10 +28,9 @@ class AuthController:
             return jsonify(result), HTTPStatus.OK
         except BadRequestException as e:
             return jsonify(e.to_dict()), e.error_code
-        except NotFoundException as e:
-            return jsonify(e.to_dict()), e.error_code
 
-    def register(self, data: dict):
+    def register(self, request: Request):
+        data = request.json
         try:
             self.service.register(data)
             return "", HTTPStatus.CREATED

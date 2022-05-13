@@ -9,13 +9,11 @@ def create_auth_handlers(controller: AuthController):
 
     @blueprint.route("/login", methods=["POST"])
     def login():
-        data = request.json
-        return controller.login(data)
+        return controller.login(request)
 
     @blueprint.route("/register", methods=["POST"])
     def register():
-        data = request.json
-        return controller.register(data)
+        return controller.register(request)
 
     @blueprint.route("/profile", methods=["GET"])
     @token_required
