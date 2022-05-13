@@ -1,4 +1,5 @@
 import jwt
+from http import HTTPStatus
 from typing import Callable
 from functools import wraps
 from flask import jsonify, request, current_app
@@ -14,14 +15,17 @@ def token_required(func: Callable) -> Callable:
             token = request.headers["Authorization"][7:]
 
         if not token:
-            return jsonify({"message": "a valid token is missing"})
+            return (
+                jsonify({"message": "a valid token is missing"}),
+                HTTPStatus.UNAUTHORIZED,
+            )
         try:
             data = jwt.decode(
                 token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
             )
             current_user = User.query.get(data["id"])
         except Exception:
-            return jsonify({"message": "token is invalid"})
+            return jsonify({"message": "token is invalid"}), HTTPStatus.UNAUTHORIZED
 
         return func(current_user, *args, **kwargs)
 

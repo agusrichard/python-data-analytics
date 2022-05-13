@@ -21,8 +21,10 @@ class AuthService:
         self.repository.update(user.id, data)
 
         data["last_login"] = data["last_login"].isoformat()
-        data["token"] = user.generate_token()
-        return data
+        return {
+            "user": data,
+            "token": user.generate_token(),
+        }
 
     def register(self, data: dict):
         self.repository.create(data)
