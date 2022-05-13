@@ -1,7 +1,5 @@
 from http import HTTPStatus
 
-import pytest
-
 DATA = {
     "username": "test",
     "email": "test@test.com",
@@ -10,6 +8,7 @@ DATA = {
 
 REGISTER_URL = "/auth/register"
 LOGIN_URL = "/auth/login"
+PROFILE_URL = "/auth/profile"
 
 
 def test_register_success(client):
@@ -69,7 +68,7 @@ def test_user_profile_success(client):
     data = response.json
 
     response = client.get(
-        "/auth/profile", headers={"Authorization": f"Bearer {data['token']}"}
+        PROFILE_URL, headers={"Authorization": f"Bearer {data['token']}"}
     )
     data = response.json
 
@@ -79,7 +78,7 @@ def test_user_profile_success(client):
 
 
 def test_user_profile_token_not_provided(client):
-    response = client.get("/auth/profile", headers={"Authorization": f""})
+    response = client.get(PROFILE_URL, headers={"Authorization": f""})
     data = response.json
 
     assert response.status_code == HTTPStatus.UNAUTHORIZED
@@ -87,7 +86,7 @@ def test_user_profile_token_not_provided(client):
 
 
 def test_user_profile_invalid_token(client):
-    response = client.get("/auth/profile", headers={"Authorization": f"Bearer invalid"})
+    response = client.get(PROFILE_URL, headers={"Authorization": f"Bearer invalid"})
     data = response.json
 
     assert response.status_code == HTTPStatus.UNAUTHORIZED
