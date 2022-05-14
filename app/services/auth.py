@@ -1,6 +1,7 @@
 from datetime import datetime
 from sqlalchemy.exc import IntegrityError
 
+from app.common import messages
 from app.repositories.user import UserRepository
 from app.common.exceptions import BadRequestException
 
@@ -12,10 +13,10 @@ class AuthService:
     def login(self, data: dict) -> dict:
         user = self.repository.get_by_email(data["email"])
         if not user:
-            raise BadRequestException("Wrong email or password")
+            raise BadRequestException(messages.WRONG_EMAIL_PASSWORD)
 
         if not user.check_password(data["password"]):
-            raise BadRequestException("Wrong email or password")
+            raise BadRequestException(messages.WRONG_EMAIL_PASSWORD)
 
         data = user.to_dict()
         data["last_login"] = datetime.utcnow()
@@ -31,4 +32,4 @@ class AuthService:
         try:
             self.repository.create(data)
         except IntegrityError:
-            raise BadRequestException("User with this email already exists")
+            raise BadRequestException(messages.USER_ALREADY_EXISTS)

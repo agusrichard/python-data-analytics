@@ -1,10 +1,9 @@
 from typing import Tuple, List
 
 from app.models.user import User
+from app.common.messages import USER_NOT_FOUND
 from app.repositories.user import UserRepository
 from app.common.exceptions import NotFoundException
-
-USER_NOT_FOUND_MESSAGE = "User not found"
 
 
 class UserService:
@@ -22,14 +21,14 @@ class UserService:
     def get_followers(self, user_id: int, take: 10, skip: 0) -> List[User]:
         user = self.repository.get_by_id(user_id)
         if user is None:
-            raise NotFoundException(USER_NOT_FOUND_MESSAGE)
+            raise NotFoundException(USER_NOT_FOUND)
 
         return user.get_followers(take, skip)
 
     def get_followed_users(self, user_id: int, take: 10, skip: 0) -> List[User]:
         user = self.repository.get_by_id(user_id)
         if user is None:
-            raise NotFoundException(USER_NOT_FOUND_MESSAGE)
+            raise NotFoundException(USER_NOT_FOUND)
 
         return user.get_followed_users(take, skip)
 
@@ -37,6 +36,6 @@ class UserService:
         from_user = self.repository.get_by_id(from_id)
         to_user = self.repository.get_by_id(to_id)
         if from_user is None or to_user is None:
-            raise NotFoundException(USER_NOT_FOUND_MESSAGE)
+            raise NotFoundException(USER_NOT_FOUND)
 
         return from_user, to_user

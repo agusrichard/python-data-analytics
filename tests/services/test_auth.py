@@ -3,6 +3,7 @@ from unittest import mock
 from sqlalchemy.exc import IntegrityError
 
 from app.services.auth import AuthService
+from app.common.messages import WRONG_EMAIL_PASSWORD
 from app.common.exceptions import BadRequestException
 
 DATA = {
@@ -53,7 +54,7 @@ def test_negative_login_user_not_found(MockedUserRepository):
         auth_service = AuthService(MockedUserRepository.return_value)
         auth_service.login(DATA)
 
-    assert str(e.value) == "Wrong email or password"
+    assert str(e.value) == WRONG_EMAIL_PASSWORD
 
     MockedUserRepository.return_value.get_by_email.assert_called_once_with(
         DATA["email"]
@@ -71,7 +72,7 @@ def test_negative_login_user_wrong_password(MockedUserRepository):
     with pytest.raises(BadRequestException) as e:
         auth_service.login(DATA)
 
-    assert str(e.value) == "Wrong email or password"
+    assert str(e.value) == WRONG_EMAIL_PASSWORD
 
     MockedUserRepository.return_value.get_by_email.assert_called_once_with(
         DATA["email"]
