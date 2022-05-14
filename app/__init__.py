@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, cli
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
@@ -6,6 +6,11 @@ from app.configs.config import configurations
 
 db = SQLAlchemy()
 migrate = Migrate()
+shell_context = {}
+
+
+def register_shell_context(name, obj):
+    shell_context[name] = obj
 
 
 def configure_auth(app: Flask, db: SQLAlchemy):
@@ -14,6 +19,8 @@ def configure_auth(app: Flask, db: SQLAlchemy):
     from app.services.auth import AuthService
     from app.controllers.auth import AuthController
     from app.handlers.auth import create_auth_handlers
+
+    register_shell_context("User", User)
 
     # Configuring auth
     auth_repository = AuthRepository(db)
@@ -40,5 +47,10 @@ def create_app(environment="development"):
     @app.errorhandler(500)
     def internal_server_error(e):
         return jsonify({"error": "Internal server error"})
+
+    @app.shell_context_processor
+    def make_shell_context():
+        register_shell_context("db", db)
+        return shell_context
 
     return app
