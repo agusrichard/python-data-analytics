@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from flask_sqlalchemy import SQLAlchemy
 
 from app.models.user import User
@@ -18,17 +18,26 @@ class AuthRepository:
         if not user:
             return None
 
-        user.fullname = data["fullname"]
-        user.bio = data["bio"]
-        user.last_login = data["last_login"]
+        user.fullname = data.get("fullname", user.fullname)
+        user.bio = data.get("bio", user.bio)
+        user.last_login = data.get("last_login", user.last_login)
+        user.avatar = data.get("avatar", user.avatar)
 
         self.db.session.commit()
 
-    def get_all(self, limit: int = 10, offset: int = 0) -> List[User]:
-        return User.query.limit(limit).offset(offset).all()
+    def get_all(self, take: int = 10, skip: int = 0) -> List[User]:
+        return User.query.limit(take).offset(skip).all()
 
-    def get_by_id(self, id: int) -> User:
+    def get_by_id(self, id: int) -> Optional[User]:
         return User.query.get(id)
 
-    def get_by_email(self, email: str) -> User:
+    def get_by_email(self, email: str) -> Optional[User]:
         return User.query.filter_by(email=email).first()
+
+    def follow(self, from_user: User, to_user: User) -> None:
+        from_user.follow(to_user)
+        self.db.session.commit()
+
+    def unfollow(self, from_user: User, to_user: User) -> None:
+        from_user.unfollow(to_user)
+        self.db.session.commit()
