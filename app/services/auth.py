@@ -1,11 +1,12 @@
 from datetime import datetime
+from sqlalchemy.exc import IntegrityError
 
-from app.repositories.auth import AuthRepository
+from app.repositories.user import UserRepository
 from app.common.exceptions import BadRequestException
 
 
 class AuthService:
-    def __init__(self, repository: AuthRepository):
+    def __init__(self, repository: UserRepository):
         self.repository = repository
 
     def login(self, data: dict) -> dict:
@@ -27,4 +28,7 @@ class AuthService:
         }
 
     def register(self, data: dict):
-        self.repository.create(data)
+        try:
+            self.repository.create(data)
+        except IntegrityError:
+            raise BadRequestException("User with this email already exists")

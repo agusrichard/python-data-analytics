@@ -1,5 +1,6 @@
 import pytest
 from unittest import mock
+from sqlalchemy.exc import IntegrityError
 
 from app.services.auth import AuthService
 from app.common.exceptions import BadRequestException
@@ -11,46 +12,67 @@ DATA = {
 }
 
 
-@mock.patch("app.services.auth.AuthRepository")
-def test_register(MockedAuthRepository):
-    auth_service = AuthService(MockedAuthRepository)
+@mock.patch("app.services.auth.UserRepository")
+def test_positive_register(MockedUserRepository):
+    auth_service = AuthService(MockedUserRepository.return_value)
 
     auth_service.register(DATA)
 
-    MockedAuthRepository.create.assert_called_once_with(DATA)
+    MockedUserRepository.return_value.create.assert_called_once_with(DATA)
 
 
-@mock.patch("app.services.auth.AuthRepository")
-def test_login_success(MockedAuthRepository):
-    auth_service = AuthService(MockedAuthRepository)
+@mock.patch("app.services.auth.UserRepository")
+def test_negative_register_user_already_exists(MockedUserRepository):
+    MockedUserRepository.return_value.create.side_effect = IntegrityError(
+        statement="", params=[], orig=None
+    )
+
+    with pytest.raises(BadRequestException):
+        auth_service = AuthService(MockedUserRepository.return_value)
+        auth_service.register(DATA)
+
+    MockedUserRepository.return_value.create.assert_called_once_with(DATA)
+
+
+@mock.patch("app.services.auth.UserRepository")
+def test_positive_login(MockedUserRepository):
+    auth_service = AuthService(MockedUserRepository.return_value)
     auth_service.login(DATA)
 
-    MockedAuthRepository.get_by_email.assert_called_once_with(DATA["email"])
-    MockedAuthRepository.update.assert_called_once()
+    MockedUserRepository.return_value.get_by_email.assert_called_once_with(
+        DATA["email"]
+    )
+    MockedUserRepository.return_value.update.assert_called_once()
 
 
-@mock.patch("app.services.auth.AuthRepository")
-def test_login_user_not_found(MockedAuthRepository):
-    MockedAuthRepository.get_by_email.return_value = None
+@mock.patch("app.services.auth.UserRepository")
+def test_negative_login_user_not_found(MockedUserRepository):
+    MockedUserRepository.return_value.get_by_email.return_value = None
 
-    auth_service = AuthService(MockedAuthRepository)
+    with pytest.raises(BadRequestException) as e:
+        auth_service = AuthService(MockedUserRepository.return_value)
+        auth_service.login(DATA)
+
+    assert str(e.value) == "Wrong email or password"
+
+    MockedUserRepository.return_value.get_by_email.assert_called_once_with(
+        DATA["email"]
+    )
+
+
+@mock.patch("app.services.auth.UserRepository")
+def test_negative_login_user_wrong_password(MockedUserRepository):
+    MockedUserRepository.return_value.get_by_email.return_value = mock.Mock()
+    MockedUserRepository.return_value.get_by_email.return_value.check_password.return_value = (
+        False
+    )
+
+    auth_service = AuthService(MockedUserRepository.return_value)
     with pytest.raises(BadRequestException) as e:
         auth_service.login(DATA)
 
     assert str(e.value) == "Wrong email or password"
 
-    MockedAuthRepository.get_by_email.assert_called_once_with(DATA["email"])
-
-
-@mock.patch("app.services.auth.AuthRepository")
-def test_login_user_wrong_password(MockedAuthRepository):
-    MockedAuthRepository.get_by_email.return_value = mock.Mock()
-    MockedAuthRepository.get_by_email.return_value.check_password.return_value = False
-
-    auth_service = AuthService(MockedAuthRepository)
-    with pytest.raises(BadRequestException) as e:
-        auth_service.login(DATA)
-
-    assert str(e.value) == "Wrong email or password"
-
-    MockedAuthRepository.get_by_email.assert_called_once_with(DATA["email"])
+    MockedUserRepository.return_value.get_by_email.assert_called_once_with(
+        DATA["email"]
+    )

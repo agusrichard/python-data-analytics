@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from app.models.user import User
 
 
-class AuthRepository:
+class UserRepository:
     def __init__(self, db: SQLAlchemy):
         self.db = db
 
