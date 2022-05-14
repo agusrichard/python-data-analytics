@@ -95,7 +95,7 @@ class User(db.Model):
     def get_followers(self, take: int = 10, skip: int = 0) -> List["User"]:
         return self.followers.limit(take).offset(skip).all()
 
-    def get_followed(self, take: int = 10, skip: int = 0) -> List["User"]:
+    def get_followed_users(self, take: int = 10, skip: int = 0) -> List["User"]:
         return self.followed.limit(take).offset(skip).all()
 
     @property
