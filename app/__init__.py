@@ -30,6 +30,20 @@ def configure_auth(app: Flask, db: SQLAlchemy):
     app.register_blueprint(auth_handlers, url_prefix="/auth")
 
 
+def configure_user(app: Flask, db: SQLAlchemy):
+    from app.repositories.user import UserRepository
+    from app.services.user import UserService
+    from app.controllers.user import UserController
+    from app.handlers.user import create_user_handlers
+
+    # Configuring auth
+    user_repository = UserRepository(db)
+    user_service = UserService(user_repository)
+    user_controller = UserController(user_service)
+    user_handlers = create_user_handlers(user_controller)
+    app.register_blueprint(user_handlers, url_prefix="/user")
+
+
 def create_app(environment="development"):
     app = Flask(__name__)
     app.config.from_object(configurations[environment])
@@ -39,6 +53,7 @@ def create_app(environment="development"):
     migrate.init_app(app, db)
 
     configure_auth(app, db)
+    configure_user(app, db)
 
     @app.errorhandler(404)
     def resource_not_found(e):

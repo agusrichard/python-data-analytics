@@ -2,8 +2,8 @@ import pytest
 from unittest import mock
 
 from app.controllers.user import UserController
-from app.common.exceptions import BadRequestException
-from app.common.messages import USER_NOT_FOUND
+from app.common.exceptions import NotFoundException
+from app.common.messages import USER_ID_REQUIRED, USER_NOT_FOUND
 
 
 @pytest.fixture
@@ -19,49 +19,93 @@ def mocked_jsonify():
 
 
 def test_positive_follow(mocked_user_service):
+    request = mock.MagicMock()
+    request.args.get.return_value = 2
+
     current_user = mock.MagicMock()
     current_user.id = 1
 
     user_controller = UserController(mocked_user_service.return_value)
-    user_controller.follow(current_user, 2)
+    user_controller.follow(request, current_user)
 
-    mocked_user_service.return_value.follow.assert_called_once_with(1, 2)
+    mocked_user_service.return_value.follow.assert_called_once_with(current_user, 2)
+    request.args.get.assert_called_once_with("user_id", None, int)
+
+
+def test_negative_follow_user_id_not_provided(mocked_user_service, mocked_jsonify):
+    request = mock.MagicMock()
+    request.args.get.return_value = None
+
+    current_user = mock.MagicMock()
+    current_user.id = 1
+
+    user_controller = UserController(mocked_user_service.return_value)
+    user_controller.follow(request, current_user)
+
+    mocked_jsonify.assert_called_once_with({"message": USER_ID_REQUIRED})
+    request.args.get.assert_called_once_with("user_id", None, int)
 
 
 def test_negative_follow_user_not_found(mocked_user_service, mocked_jsonify):
+    request = mock.MagicMock()
+    request.args.get.return_value = 2
+
     current_user = mock.MagicMock()
     current_user.id = 1
-    mocked_user_service.return_value.follow.side_effect = BadRequestException(
-        USER_NOT_FOUND
-    )
+    err = NotFoundException(USER_NOT_FOUND)
+    mocked_user_service.return_value.follow.side_effect = err
 
     user_controller = UserController(mocked_user_service.return_value)
-    user_controller.follow(current_user, 2)
+    user_controller.follow(request, current_user)
 
-    mocked_user_service.return_value.follow.assert_called_once_with(1, 2)
+    mocked_user_service.return_value.follow.assert_called_once_with(current_user, 2)
+    request.args.get.assert_called_once_with("user_id", None, int)
+    mocked_jsonify.assert_called_once_with(err.to_dict())
 
 
 def test_positive_unfollow(mocked_user_service):
+    request = mock.MagicMock()
+    request.args.get.return_value = 2
+
     current_user = mock.MagicMock()
     current_user.id = 1
 
     user_controller = UserController(mocked_user_service.return_value)
-    user_controller.unfollow(current_user, 2)
+    user_controller.unfollow(request, current_user)
 
-    mocked_user_service.return_value.unfollow.assert_called_once_with(1, 2)
+    mocked_user_service.return_value.unfollow.assert_called_once_with(current_user, 2)
+    request.args.get.assert_called_once_with("user_id", None, int)
+
+
+def test_negative_unfollow_user_id_not_provided(mocked_user_service, mocked_jsonify):
+    request = mock.MagicMock()
+    request.args.get.return_value = None
+
+    current_user = mock.MagicMock()
+    current_user.id = 1
+
+    user_controller = UserController(mocked_user_service.return_value)
+    user_controller.unfollow(request, current_user)
+
+    mocked_jsonify.assert_called_once_with({"message": USER_ID_REQUIRED})
+    request.args.get.assert_called_once_with("user_id", None, int)
 
 
 def test_negative_unfollow_user_not_found(mocked_user_service, mocked_jsonify):
+    request = mock.MagicMock()
+    request.args.get.return_value = 2
+
     current_user = mock.MagicMock()
     current_user.id = 1
-    mocked_user_service.return_value.unfollow.side_effect = BadRequestException(
-        USER_NOT_FOUND
-    )
+    err = NotFoundException(USER_NOT_FOUND)
+    mocked_user_service.return_value.unfollow.side_effect = err
 
     user_controller = UserController(mocked_user_service.return_value)
-    user_controller.unfollow(current_user, 2)
+    user_controller.unfollow(request, current_user)
 
-    mocked_user_service.return_value.unfollow.assert_called_once_with(1, 2)
+    mocked_user_service.return_value.unfollow.assert_called_once_with(current_user, 2)
+    request.args.get.assert_called_once_with("user_id", None, int)
+    mocked_jsonify.assert_called_once_with(err.to_dict())
 
 
 def test_positive_get_followers(mocked_user_service, mocked_jsonify):
