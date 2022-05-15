@@ -31,8 +31,8 @@ class AuthController:
             return jsonify(e.to_dict()), e.error_code
 
     def register(self, request: Request) -> Tuple[Response, int]:
-        data = request.json
         try:
+            data = request.json
             self.service.register(data)
             return "", HTTPStatus.CREATED
         except DataAlreadyExists as e:

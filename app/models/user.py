@@ -93,10 +93,12 @@ class User(db.Model):
             self.followed.remove(user)
 
     def get_followers(self, take: int = 10, skip: int = 0) -> List["User"]:
-        return self.followers.limit(take).offset(skip).all()
+        result = self.followers.limit(take).offset(skip).all()
+        return [user.to_dict() for user in result]
 
     def get_followed_users(self, take: int = 10, skip: int = 0) -> List["User"]:
-        return self.followed.limit(take).offset(skip).all()
+        result = self.followed.limit(take).offset(skip).all()
+        return [user.to_dict() for user in result]
 
     @property
     def password(self):
