@@ -18,14 +18,16 @@ class UserService:
         from_user, to_user = self.__get_from_to_users(from_id, to_id)
         self.repository.unfollow(from_user, to_user)
 
-    def get_followers(self, user_id: int, take: 10, skip: 0) -> List[User]:
+    def get_followers(self, user_id: int, take: int = 10, skip: int = 0) -> List[User]:
         user = self.repository.get_by_id(user_id)
         if user is None:
             raise NotFoundException(USER_NOT_FOUND)
 
         return user.get_followers(take, skip)
 
-    def get_followed_users(self, user_id: int, take: 10, skip: 0) -> List[User]:
+    def get_followed_users(
+        self, user_id: int, take: int = 10, skip: int = 0
+    ) -> List[User]:
         user = self.repository.get_by_id(user_id)
         if user is None:
             raise NotFoundException(USER_NOT_FOUND)
