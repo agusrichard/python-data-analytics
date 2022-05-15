@@ -1,5 +1,6 @@
 import pytest
 from flask import Flask
+from unittest import mock
 from flask_sqlalchemy import SQLAlchemy
 
 
