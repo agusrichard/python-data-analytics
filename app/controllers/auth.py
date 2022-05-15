@@ -1,9 +1,8 @@
-from flask import jsonify, Request
 from http import HTTPStatus
-from sqlalchemy.exc import IntegrityError
+from flask import jsonify, Request
 
 from app.services.auth import AuthService
-from app.common.exceptions import BadRequestException, NotFoundException
+from app.common.exceptions import BadRequestException, DataAlreadyExists
 
 
 class AuthController:
@@ -34,16 +33,8 @@ class AuthController:
         try:
             self.service.register(data)
             return "", HTTPStatus.CREATED
-        except IntegrityError:
-            return (
-                jsonify(
-                    {
-                        "message": "User already exists",
-                        "error_code": HTTPStatus.CONFLICT,
-                    }
-                ),
-                HTTPStatus.CONFLICT,
-            )
+        except DataAlreadyExists as e:
+            return jsonify(e.to_dict()), e.error_code
 
     def profile(self, current_user):
         return jsonify(current_user.to_dict())

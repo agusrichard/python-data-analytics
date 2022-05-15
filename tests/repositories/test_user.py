@@ -2,16 +2,16 @@ import pytest
 from unittest import mock
 from datetime import datetime
 
-from app.repositories.auth import AuthRepository
+from app.repositories.user import UserRepository
 
 TEST_EMAIL = "test@test.com"
 
 
 @pytest.fixture
 def auth_repository_db_user():
-    with mock.patch("app.repositories.auth.SQLAlchemy") as mocked_db:
-        with mock.patch("app.repositories.auth.User") as MockedUser:
-            yield AuthRepository(mocked_db), mocked_db, MockedUser
+    with mock.patch("app.repositories.user.SQLAlchemy") as mocked_db:
+        with mock.patch("app.repositories.user.User") as MockedUser:
+            yield UserRepository(mocked_db), mocked_db, MockedUser
 
 
 def test_positive_create_user(auth_repository_db_user):
