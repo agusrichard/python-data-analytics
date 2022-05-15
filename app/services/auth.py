@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.common import messages
 from app.repositories.user import UserRepository
-from app.common.exceptions import BadRequestException
+from app.common.exceptions import BadRequestException, DataAlreadyExists
 
 
 class AuthService:
@@ -32,4 +32,4 @@ class AuthService:
         try:
             self.repository.create(data)
         except IntegrityError:
-            raise BadRequestException(messages.USER_ALREADY_EXISTS)
+            raise DataAlreadyExists(messages.USER_ALREADY_EXISTS)

@@ -1,10 +1,9 @@
 import pytest
 from unittest import mock
-from sqlalchemy.exc import IntegrityError
 
 from app.services.auth import AuthService
-from app.common.messages import WRONG_EMAIL_PASSWORD
-from app.common.exceptions import BadRequestException
+from app.common.messages import WRONG_EMAIL_PASSWORD, USER_ALREADY_EXISTS
+from app.common.exceptions import BadRequestException, DataAlreadyExists
 
 DATA = {
     "username": "test",
@@ -24,11 +23,11 @@ def test_positive_register(MockedUserRepository):
 
 @mock.patch("app.services.auth.UserRepository")
 def test_negative_register_user_already_exists(MockedUserRepository):
-    MockedUserRepository.return_value.create.side_effect = IntegrityError(
-        statement="", params=[], orig=None
+    MockedUserRepository.return_value.create.side_effect = DataAlreadyExists(
+        USER_ALREADY_EXISTS
     )
 
-    with pytest.raises(BadRequestException):
+    with pytest.raises(DataAlreadyExists):
         auth_service = AuthService(MockedUserRepository.return_value)
         auth_service.register(DATA)
 

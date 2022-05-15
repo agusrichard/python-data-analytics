@@ -1,8 +1,8 @@
 from unittest import mock
-from sqlalchemy.exc import IntegrityError
 
 from app.controllers.auth import AuthController
-from app.common.exceptions import BadRequestException, NotFoundException
+from app.common.messages import USER_ALREADY_EXISTS
+from app.common.exceptions import BadRequestException, DataAlreadyExists
 
 DATA = {
     "username": "test",
@@ -25,9 +25,7 @@ def test_register_success(mocked_auth_service):
 @mock.patch("app.controllers.auth.AuthService")
 @mock.patch("app.controllers.auth.jsonify")
 def test_register_user_already_exists(mocked_jsonify, mocked_auth_service):
-    mocked_auth_service.register.side_effect = IntegrityError(
-        statement="", params=None, orig=None
-    )
+    mocked_auth_service.register.side_effect = DataAlreadyExists(USER_ALREADY_EXISTS)
 
     request = mock.MagicMock()
     request.json = DATA

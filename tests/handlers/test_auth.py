@@ -1,5 +1,7 @@
 from http import HTTPStatus
 
+from app.common.messages import USER_ALREADY_EXISTS
+
 DATA = {
     "username": "test",
     "email": "test@test.com",
@@ -22,7 +24,7 @@ def test_register_user_already_exists(client):
     response = client.post(REGISTER_URL, json=DATA)
 
     assert response.status_code == HTTPStatus.CONFLICT
-    assert response.json["message"] == "User already exists"
+    assert response.json["message"] == USER_ALREADY_EXISTS
     assert response.json["error_code"] == HTTPStatus.CONFLICT
 
 
