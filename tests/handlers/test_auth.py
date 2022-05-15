@@ -1,6 +1,12 @@
 from http import HTTPStatus
 
-from app.common.messages import USER_ALREADY_EXISTS
+from app.common.messages import (
+    TOKEN_INVALID,
+    USER_ALREADY_EXISTS,
+    VALID_TOKEN_MISSING,
+    WRONG_EMAIL_PASSWORD,
+    EMAIL_PASSWORD_REQUIRED,
+)
 
 DATA = {
     "username": "test",
@@ -13,13 +19,13 @@ LOGIN_URL = "/auth/login"
 PROFILE_URL = "/auth/profile"
 
 
-def test_register_success(client):
+def test_positive_register(client):
     response = client.post(REGISTER_URL, json=DATA)
 
-    assert response.status_code == 201
+    assert response.status_code == HTTPStatus.CREATED
 
 
-def test_register_user_already_exists(client):
+def test_negative_register_user_already_exists(client):
     client.post(REGISTER_URL, json=DATA)
     response = client.post(REGISTER_URL, json=DATA)
 
@@ -28,7 +34,7 @@ def test_register_user_already_exists(client):
     assert response.json["error_code"] == HTTPStatus.CONFLICT
 
 
-def test_login_success(client):
+def test_positive_login(client):
     client.post(REGISTER_URL, json=DATA)
     response = client.post(LOGIN_URL, json=DATA)
     data = response.json
@@ -38,17 +44,17 @@ def test_login_success(client):
     assert "user" in data
 
 
-def test_login_email_password_not_provided(client):
+def test_negative_login_email_password_not_provided(client):
     client.post(REGISTER_URL, json=DATA)
     response = client.post(LOGIN_URL, json={})
     data = response.json
 
     assert response.status_code == HTTPStatus.BAD_REQUEST
-    assert "message" in data
-    assert "error_code" in data
+    assert data["message"] == EMAIL_PASSWORD_REQUIRED
+    assert data["error_code"] == HTTPStatus.BAD_REQUEST
 
 
-def test_login_user_not_found(client):
+def test_negative_login_user_not_found(client):
     client.post(REGISTER_URL, json=DATA)
     response = client.post(
         LOGIN_URL,
@@ -60,11 +66,11 @@ def test_login_user_not_found(client):
     data = response.json
 
     assert response.status_code == HTTPStatus.BAD_REQUEST
-    assert data["message"] == "Wrong email or password"
+    assert data["message"] == WRONG_EMAIL_PASSWORD
     assert data["error_code"] == HTTPStatus.BAD_REQUEST
 
 
-def test_user_profile_success(client):
+def test_positive_user_profile_success(client):
     client.post(REGISTER_URL, json=DATA)
     response = client.post(LOGIN_URL, json=DATA)
     data = response.json
@@ -75,21 +81,27 @@ def test_user_profile_success(client):
     data = response.json
 
     assert response.status_code == HTTPStatus.OK
-    assert "email" in data
-    assert "username" in data
+    assert data["username"] == DATA["username"]
+    assert data["email"] == DATA["email"]
+    assert "id" in data
+    assert "bio" in data
+    assert "avatar" in data
+    assert "created_at" in data
+    assert "updated_at" in data
+    assert "last_login" in data
 
 
-def test_user_profile_token_not_provided(client):
+def test_negative_user_profile_token_not_provided(client):
     response = client.get(PROFILE_URL, headers={"Authorization": f""})
     data = response.json
 
     assert response.status_code == HTTPStatus.UNAUTHORIZED
-    assert data["message"] == "a valid token is missing"
+    assert data["message"] == VALID_TOKEN_MISSING
 
 
-def test_user_profile_invalid_token(client):
+def test_negative_user_profile_invalid_token(client):
     response = client.get(PROFILE_URL, headers={"Authorization": f"Bearer invalid"})
     data = response.json
 
     assert response.status_code == HTTPStatus.UNAUTHORIZED
-    assert data["message"] == "token is invalid"
+    assert data["message"] == TOKEN_INVALID

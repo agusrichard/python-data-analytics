@@ -5,6 +5,7 @@ from functools import wraps
 from flask import jsonify, request, current_app
 
 from app.models.user import User
+from app.common.messages import TOKEN_INVALID, VALID_TOKEN_MISSING
 
 
 def token_required(func: Callable) -> Callable:
@@ -16,7 +17,7 @@ def token_required(func: Callable) -> Callable:
 
         if not token:
             return (
-                jsonify({"message": "a valid token is missing"}),
+                jsonify({"message": VALID_TOKEN_MISSING}),
                 HTTPStatus.UNAUTHORIZED,
             )
         try:
@@ -25,7 +26,7 @@ def token_required(func: Callable) -> Callable:
             )
             current_user = User.query.get(data["id"])
         except Exception:
-            return jsonify({"message": "token is invalid"}), HTTPStatus.UNAUTHORIZED
+            return jsonify({"message": TOKEN_INVALID}), HTTPStatus.UNAUTHORIZED
 
         return func(current_user, *args, **kwargs)
 
