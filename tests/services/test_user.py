@@ -15,7 +15,7 @@ def test_positive_follow(MockedUserRepository):
     user_service.follow(1, 2)
 
     MockedUserRepository.return_value.follow.assert_called_once()
-    assert MockedUserRepository.return_value.get_by_id.call_count == 2
+    MockedUserRepository.return_value.get_by_id.assert_called_once()
 
 
 @mock.patch("app.services.user.UserRepository")
@@ -27,7 +27,7 @@ def test_negative_follow_users_not_found(MockedUserRepository):
     with pytest.raises(NotFoundException):
         user_service.follow(1, 2)
 
-    assert MockedUserRepository.return_value.get_by_id.call_count == 2
+    MockedUserRepository.return_value.get_by_id.assert_called_once()
 
 
 @mock.patch("app.services.user.UserRepository")
@@ -39,7 +39,7 @@ def test_positive_unfollow(MockedUserRepository):
     user_service.unfollow(1, 2)
 
     MockedUserRepository.return_value.unfollow.assert_called_once()
-    assert MockedUserRepository.return_value.get_by_id.call_count == 2
+    MockedUserRepository.return_value.get_by_id.assert_called_once()
 
 
 @mock.patch("app.services.user.UserRepository")
@@ -51,7 +51,7 @@ def test_negative_unfollow_users_not_found(MockedUserRepository):
     with pytest.raises(NotFoundException):
         user_service.unfollow(1, 2)
 
-    assert MockedUserRepository.return_value.get_by_id.call_count == 2
+    MockedUserRepository.return_value.get_by_id.assert_called_once()
 
 
 @mock.patch("app.services.user.UserRepository")
