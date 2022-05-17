@@ -44,6 +44,10 @@ def configure_user(app: Flask, db: SQLAlchemy):
     app.register_blueprint(user_handlers, url_prefix="/user")
 
 
+def configure_song(app: Flask, db: SQLAlchemy):
+    from app.models.song import Song
+
+
 def create_app(environment="development"):
     app = Flask(__name__)
     app.config.from_object(configurations[environment])
@@ -54,6 +58,7 @@ def create_app(environment="development"):
 
     configure_auth(app, db)
     configure_user(app, db)
+    configure_song(app, db)
 
     @app.errorhandler(404)
     def resource_not_found(e):
