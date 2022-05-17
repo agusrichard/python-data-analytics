@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db
+from app.models.song import Song
 
 followers = db.Table(
     "followers",
@@ -100,6 +101,10 @@ class User(db.Model):
     def get_followed_users(self, take: int = 10, skip: int = 0) -> List["User"]:
         result = self.followed.limit(take).offset(skip).all()
         return [user.to_dict() for user in result]
+
+    def get_songs(self, take: int = 10, skip: int = 0) -> List[Song]:
+        result = self.songs.limit(take).offset(skip).all()
+        return [song.to_dict() for song in result]
 
     @property
     def password(self):

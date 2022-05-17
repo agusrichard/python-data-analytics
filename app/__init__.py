@@ -9,7 +9,7 @@ migrate = Migrate()
 shell_context = {}
 
 
-def register_shell_context(name, obj):
+def register_shell_context(name: str, obj: object):
     shell_context[name] = obj
 
 
@@ -46,6 +46,8 @@ def configure_user(app: Flask, db: SQLAlchemy):
 
 def configure_song(app: Flask, db: SQLAlchemy):
     from app.models.song import Song
+
+    register_shell_context("Song", Song)
 
 
 def create_app(environment="development"):
