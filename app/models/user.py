@@ -37,6 +37,7 @@ class User(db.Model):
         backref=db.backref("followers", lazy="dynamic"),
         lazy="dynamic",
     )
+    songs = db.relationship("Song", backref="user", lazy="dynamic")
 
     def check_password(self, password: str):
         return check_password_hash(self._password, password)
