@@ -1,5 +1,5 @@
-from typing import List
 from datetime import datetime
+from typing import List, Optional
 
 from app import db
 
@@ -38,6 +38,10 @@ class Song(db.Model):
         return f"Song('{self.title}', '{self.song_url}')"
 
     @classmethod
-    def get_by_id(cls, id: int) -> dict:
+    def get_by_id(cls, id: int) -> Optional[dict]:
         song: "Song" = cls.query.filter_by(id=id).first()
         return song.to_dict() if song is not None else None
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Song":
+        return cls(**data)
