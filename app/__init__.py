@@ -46,8 +46,19 @@ def configure_user(app: Flask, db: SQLAlchemy):
 
 def configure_song(app: Flask, db: SQLAlchemy):
     from app.models.song import Song
+    from app.repositories.song import SongRepository
+    from app.services.song import SongService
+    from app.controllers.song import SongController
+    from app.handlers.song import create_song_handlers
 
     register_shell_context("Song", Song)
+
+    # Configuring song
+    song_repository = SongRepository(db)
+    song_service = SongService(song_repository)
+    song_controller = SongController(song_service)
+    song_handlers = create_song_handlers(song_controller)
+    app.register_blueprint(song_handlers, url_prefix="/song")
 
 
 def create_app(environment="development"):
