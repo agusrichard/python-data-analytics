@@ -253,3 +253,21 @@ def test_positive_delete_song(db: SQLAlchemy, user: User):
     db.session.commit()
 
     assert Song.query.filter_by(title="test").first() is None
+
+
+def test_positive_song_from_dict(db: SQLAlchemy, user: User):
+    song = Song.from_dict(
+        {
+            "title": "test",
+            "song_url": "test",
+            "small_thumbnail_url": "test",
+            "large_thumbnail_url": "test",
+            "user_id": user.id,
+        }
+    )
+
+    assert song.title == "test"
+    assert song.song_url == "test"
+    assert song.small_thumbnail_url == "test"
+    assert song.large_thumbnail_url == "test"
+    assert song.user_id == user.id
