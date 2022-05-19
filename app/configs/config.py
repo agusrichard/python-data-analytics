@@ -7,6 +7,10 @@ load_dotenv(os.path.join(BASEDIR, ".env"))
 
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY") or "hard to guess string"
+    AWS_ACCESS_KEY = os.environ.get("AWS_ACCESS_KEY")
+    AWS_ACCESS_SECRET = os.environ.get("AWS_ACCESS_SECRET")
+    S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME")
+    S3_BUCKET_BASE_URL = os.environ.get("S3_BUCKET_BASE_URL")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_RECORD_QUERIES = True
 
