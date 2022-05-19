@@ -7,10 +7,11 @@ from app.controllers.song import SongController
 def create_song_handlers(controller: SongController):
     blueprint = Blueprint("song", __name__)
 
+    # @token_required
     @blueprint.route("/create", methods=["POST"])
     @token_required
-    def create():
-        return controller.create(request)
+    def create(current_user):
+        return controller.create(request, current_user)
 
     @blueprint.route("/update", methods=["POST"])
     @token_required
