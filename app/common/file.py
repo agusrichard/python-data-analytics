@@ -1,6 +1,8 @@
 import boto3
 from flask import Flask
 from typing import Callable
+from datetime import datetime
+from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 
 
@@ -32,3 +34,16 @@ def create_file_uploader(app: Flask) -> Callable:
             print("An error occurred uploading file to S3", str(e))
 
     return upload_file
+
+
+def renaming_file(filename: str):
+    uploaded_date = datetime.utcnow()
+
+    splitted = filename.rsplit(".", 1)
+    updated_filename = splitted[0]
+    file_extension = splitted[1]
+    updated_filename = secure_filename(updated_filename.lower())
+    updated_filename = f"{uploaded_date.strftime('%Y%m%d%H%M%S')}--{updated_filename}"
+    updated_filename = f"{updated_filename}.{file_extension}"
+
+    return updated_filename
