@@ -1,9 +1,10 @@
 from datetime import datetime
-from typing import Callable, List
+from typing import Callable, List, Dict
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 
 from app.repositories.song import SongRepository
+from app.common.file import renaming_file
 
 
 class SongService:
@@ -11,17 +12,12 @@ class SongService:
         self.repository = repository
         self.upload_file = upload_file
 
-    def create(self, file: FileStorage, song_data: dict) -> dict:
-        uploaded_date = datetime.utcnow()
-        splitted = file.filename.rsplit(".", 1)
-        filename = splitted[0]
-        file_extension = splitted[1]
-        filename = secure_filename(filename.lower())
-        filename = f"{uploaded_date.strftime('%Y%m%d%H%M%S')}--{filename}"
-        filename = f"{filename}.{file_extension}"
-        file.filename = filename
-        song_url = self.upload_file(file)
-        song_data["song_url"] = song_url
+    def create(self, files: Dict[str, FileStorage], song_data: dict) -> dict:
+        for key, file in files.items():
+            file.filename = renaming_file(file.filename)
+            key_data = key.replace("file", "url")
+            song_data[key_data] = self.upload_file(file)
+
         return self.repository.create(song_data)
 
     def update(self, song_id: int, song: dict) -> dict:
