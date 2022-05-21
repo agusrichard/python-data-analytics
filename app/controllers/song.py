@@ -13,10 +13,14 @@ class SongController:
 
     def create(self, request: Request, current_user: User) -> Tuple[Response, int]:
         try:
-            song_file = request.files["song_file"]
+            files = {
+                "song_file": request.files["song_file"],
+                "small_thumbnail_file": request.files["small_thumbnail_file"],
+                "large_thumbnail_file": request.files["large_thumbnail_file"],
+            }
             data = request.form.to_dict()
             data["user_id"] = current_user.id
-            self.service.create(song_file, data)
+            self.service.create(files, data)
             return "", HTTPStatus.OK
         except Exception:
             return "", HTTPStatus.INTERNAL_SERVER_ERROR
