@@ -1,6 +1,6 @@
-from flask import Response, Request, jsonify
 from http import HTTPStatus
-from typing import List, Tuple
+from typing import List, Tuple, Optional
+from flask import Response, Request, jsonify
 
 from app.models.song import Song
 from app.models.user import User
@@ -25,12 +25,19 @@ class SongController:
         except Exception:
             return "", HTTPStatus.INTERNAL_SERVER_ERROR
 
-    def update(self, request: Request) -> Tuple[Response, int]:
+    def update(self, song_id: Optional[int], request: Request) -> Tuple[Response, int]:
         try:
-            song_id = int(request.view_args["song_id"])
-            song = self.service.update(song_id, request.json)
+            if song_id is None:
+                return "", HTTPStatus.BAD_REQUEST
+
+            song_id = int(song_id)
+            files = {}
+            for key, file in request.files.items():
+                files[key] = file
+            song = self.service.update(song_id, files, request.form.to_dict())
             return jsonify(song), HTTPStatus.OK
         except Exception as e:
+            print("Exception:", e)
             return "", HTTPStatus.INTERNAL_SERVER_ERROR
 
     def delete(self, request: Request) -> Tuple[Response, int]:

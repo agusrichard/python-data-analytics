@@ -158,11 +158,11 @@ def test_get_song_by_id(db: SQLAlchemy, user: User):
 
     song: Song = Song.get_by_id(song.id)
 
-    assert song["title"] == "test"
-    assert song["song_url"] == "test"
-    assert song["small_thumbnail_url"] == "test"
-    assert song["large_thumbnail_url"] == "test"
-    assert song["user_id"] == user.id
+    assert song.title == "test"
+    assert song.song_url == "test"
+    assert song.small_thumbnail_url == "test"
+    assert song.large_thumbnail_url == "test"
+    assert song.user_id == user.id
 
 
 def test_positive_get_songs_directly(user: User, songs: List[Song]):

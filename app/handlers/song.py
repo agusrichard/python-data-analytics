@@ -13,10 +13,10 @@ def create_song_handlers(controller: SongController):
     def create(current_user):
         return controller.create(request, current_user)
 
-    @blueprint.route("/update", methods=["POST"])
+    @blueprint.route("/update/<int:song_id>", methods=["PUT"])
     @token_required
-    def update():
-        return controller.update(request)
+    def update(_, song_id):
+        return controller.update(song_id, request)
 
     @blueprint.route("/delete", methods=["POST"])
     @token_required

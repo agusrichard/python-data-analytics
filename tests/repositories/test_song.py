@@ -74,27 +74,9 @@ def test_positive_update_song(mocked_db: SQLAlchemy, MockedSong: Song):
         "large_thumbnail_url": "test",
     }
 
-    song_repository.update(1, data)
+    song_repository.update(MockedSong.return_value, data)
 
     mocked_db.session.commit.assert_called_once()
-    MockedSong.get_by_id.assert_called_once_with(1)
-
-
-def test_negative_update_song_not_found(mocked_db: SQLAlchemy, MockedSong: Song):
-    MockedSong.get_by_id.return_value = None
-
-    song_repository = SongRepository(mocked_db)
-
-    data = {
-        "title": "test",
-        "song_url": "test",
-        "small_thumbnail_url": "test",
-        "large_thumbnail_url": "test",
-    }
-
-    song_repository.update(1, data)
-
-    mocked_db.session.commit.assert_not_called()
 
 
 def test_negative_update_song_required_to_none(mocked_db: SQLAlchemy, MockedSong: Song):
@@ -112,29 +94,16 @@ def test_negative_update_song_required_to_none(mocked_db: SQLAlchemy, MockedSong
     }
 
     with pytest.raises(IntegrityError):
-        song_repository.update(1, data)
+        song_repository.update(MockedSong.return_value, data)
 
 
 def test_positive_delete_song(mocked_db: SQLAlchemy, MockedSong: Song):
     song_repository = SongRepository(mocked_db)
 
-    song_repository.delete(1)
+    song_repository.delete(MockedSong.return_value)
 
     mocked_db.session.delete.assert_called_once()
     mocked_db.session.commit.assert_called_once()
-    MockedSong.get_by_id.assert_called_once_with(1)
-
-
-def test_negative_delete_song_not_found(mocked_db: SQLAlchemy, MockedSong: Song):
-    MockedSong.get_by_id.return_value = None
-
-    song_repository = SongRepository(mocked_db)
-
-    song_repository.delete(1)
-
-    mocked_db.session.delete.assert_not_called()
-    mocked_db.session.commit.assert_not_called()
-    MockedSong.get_by_id.assert_called_once_with(1)
 
 
 def test_positive_get_all_songs_default(mocked_db: SQLAlchemy, MockedSong: Song):

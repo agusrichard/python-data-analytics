@@ -13,11 +13,7 @@ class SongRepository:
         self.db.session.add(song)
         self.db.session.commit()
 
-    def update(self, id: int, data: dict) -> None:
-        song = self.get_by_id(id)
-        if not song:
-            return None
-
+    def update(self, song: Song, data: dict) -> None:
         song.title = data.get("title", song.title)
         song.song_url = data.get("song_url", song.song_url)
         song.small_thumbnail_url = data.get(
@@ -29,11 +25,7 @@ class SongRepository:
 
         self.db.session.commit()
 
-    def delete(self, id: int) -> None:
-        song = self.get_by_id(id)
-        if not song:
-            return None
-
+    def delete(self, song: Song) -> None:
         self.db.session.delete(song)
         self.db.session.commit()
 

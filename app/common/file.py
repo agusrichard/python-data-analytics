@@ -5,6 +5,8 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 
+from app.common.exceptions import UploadFailedException
+
 
 def create_file_uploader(app: Flask) -> Callable:
     """
@@ -31,7 +33,7 @@ def create_file_uploader(app: Flask) -> Callable:
             )
             return f"{app.config['S3_BUCKET_BASE_URL']}/{file.filename}"
         except Exception as e:
-            print("An error occurred uploading file to S3", str(e))
+            raise UploadFailedException()
 
     return upload_file
 
