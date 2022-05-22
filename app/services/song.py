@@ -18,8 +18,17 @@ class SongService:
 
         return self.repository.create(song_data)
 
-    def update(self, song_id: int, song: dict) -> dict:
-        return self.repository.update(song_id, song)
+    def update(
+        self, song_id: int, files: Dict[str, FileStorage], song_data: dict
+    ) -> dict:
+        for key, file in files.items():
+            file.filename = renaming_file(file.filename)
+            key_data = key.replace("file", "url")
+            song_data[key_data] = self.upload_file(file)
+
+        print("update song_data", song_data)
+
+        return self.repository.update(song_id, song_data)
 
     def delete(self, song_id: int) -> None:
         self.repository.delete(song_id)

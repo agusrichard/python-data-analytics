@@ -18,6 +18,8 @@ class SongRepository:
         if not song:
             return None
 
+        print("update repository song", data)
+
         song.title = data.get("title", song.title)
         song.song_url = data.get("song_url", song.song_url)
         song.small_thumbnail_url = data.get(
@@ -26,6 +28,8 @@ class SongRepository:
         song.large_thumbnail_url = data.get(
             "large_thumbnail_url", song.large_thumbnail_url
         )
+
+        print("song_dict", song.to_dict())
 
         self.db.session.commit()
 
@@ -38,7 +42,7 @@ class SongRepository:
         self.db.session.commit()
 
     def get_by_id(self, id: int) -> Optional[Song]:
-        return Song.get_by_id(id)
+        return Song.query.get(id)
 
     def get_all(self, take: int = 10, skip: int = 0) -> List[Song]:
         return Song.paginate(take, skip)
