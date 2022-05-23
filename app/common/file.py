@@ -5,6 +5,7 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 
+from app.common.messages import INVALID_FILENAME
 from app.common.exceptions import UploadFailedException, BadRequestException
 
 
@@ -43,7 +44,7 @@ def renaming_file(filename: str):
 
     splitted = filename.rsplit(".", 1)
     if len(splitted) < 2:
-        raise BadRequestException(f"Invalid file name")
+        raise BadRequestException(INVALID_FILENAME)
 
     updated_filename = splitted[0]
     file_extension = splitted[1]

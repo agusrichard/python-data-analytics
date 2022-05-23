@@ -3,9 +3,17 @@ from werkzeug.datastructures import FileStorage
 
 from app.models.user import User
 from app.common.file import renaming_file
-from app.common.messages import SONG_NOT_FOUND
 from app.repositories.song import SongRepository
-from app.common.exceptions import NotFoundException, FieldRequired, Unauthorized
+from app.common.exceptions import (
+    NotFoundException,
+    UnauthorizedException,
+    FieldRequiredException,
+)
+from app.common.messages import (
+    SONG_NOT_FOUND,
+    UNAUTHORIZED_TO_DELETE_SONG,
+    UNAUTHORIZED_TO_UPDATE_SONG,
+)
 
 
 class SongService:
@@ -15,10 +23,10 @@ class SongService:
 
     def create(self, files: Dict[str, FileStorage], song_data: dict) -> dict:
         if "title" not in song_data or not song_data:
-            raise FieldRequired("title")
+            raise FieldRequiredException("title")
 
         if "song_file" not in files or not files["song_file"]:
-            raise FieldRequired("song_file")
+            raise FieldRequiredException("song_file")
 
         for key, file in files.items():
             if file.filename == "":
@@ -42,7 +50,7 @@ class SongService:
             raise NotFoundException(SONG_NOT_FOUND)
 
         if current_user.id != song.user_id:
-            raise Unauthorized()
+            raise UnauthorizedException(UNAUTHORIZED_TO_UPDATE_SONG)
 
         for key, file in files.items():
             if file.filename == "":
@@ -60,7 +68,7 @@ class SongService:
             raise NotFoundException(SONG_NOT_FOUND)
 
         if current_user.id != song.user_id:
-            raise Unauthorized()
+            raise UnauthorizedException(UNAUTHORIZED_TO_DELETE_SONG)
 
         self.repository.delete(song)
 

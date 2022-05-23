@@ -6,11 +6,11 @@ from app.models.song import Song
 from app.models.user import User
 from app.services.song import SongService
 from app.common.exceptions import (
-    BadRequestException,
-    FieldRequired,
-    Unauthorized,
-    UploadFailedException,
     NotFoundException,
+    BadRequestException,
+    UnauthorizedException,
+    UploadFailedException,
+    FieldRequiredException,
 )
 
 
@@ -31,7 +31,7 @@ class SongController:
             print("create song data", data)
             self.service.create(files, data)
             return "", HTTPStatus.CREATED
-        except FieldRequired as e:
+        except FieldRequiredException as e:
             return jsonify(e.to_dict()), e.error_code
         except UploadFailedException as e:
             return jsonify(e.to_dict()), e.error_code
@@ -43,7 +43,7 @@ class SongController:
     ) -> Tuple[Response, int]:
         try:
             if song_id is None:
-                err = FieldRequired("song_id")
+                err = FieldRequiredException("song_id")
                 return err.to_dict(), err.error_code
 
             song_id = int(song_id)
@@ -53,7 +53,7 @@ class SongController:
 
             self.service.update(current_user, song_id, files, request.form.to_dict())
             return "", HTTPStatus.OK
-        except Unauthorized as e:
+        except UnauthorizedException as e:
             return jsonify(e.to_dict()), e.error_code
         except NotFoundException as e:
             return jsonify(e.to_dict()), e.error_code
@@ -67,12 +67,12 @@ class SongController:
     ) -> Tuple[Response, int]:
         try:
             if song_id is None:
-                err = FieldRequired("song_id")
+                err = FieldRequiredException("song_id")
                 return err.to_dict(), err.error_code
 
             self.service.delete(current_user, song_id)
             return "", HTTPStatus.OK
-        except Unauthorized as e:
+        except UnauthorizedException as e:
             return jsonify(e.to_dict()), e.error_code
         except NotFoundException as e:
             return jsonify(e.to_dict()), e.error_code

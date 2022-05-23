@@ -35,12 +35,12 @@ class UploadFailedException(BaseAPIException):
         super().__init__(FAILED_TO_UPLOAD, HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
-class FieldRequired(BaseAPIException):
+class FieldRequiredException(BaseAPIException):
     def __init__(self, field_name: str):
         message = f"{field_name} is required"
         super().__init__(message, HTTPStatus.BAD_REQUEST)
 
 
-class Unauthorized(BaseAPIException):
-    def __init__(self):
-        super().__init__("Unauthorized", HTTPStatus.UNAUTHORIZED)
+class UnauthorizedException(BaseAPIException):
+    def __init__(self, message: str):
+        super().__init__(message, HTTPStatus.UNAUTHORIZED)
