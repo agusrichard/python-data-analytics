@@ -31,6 +31,7 @@ def create_song_handlers(controller: SongController):
     @blueprint.route("/get-by-id/<int:song_id>", methods=["GET"])
     @token_required
     def get_by_id(_, song_id):
+        print("Something")
         return controller.get_by_id(song_id)
 
     return blueprint
