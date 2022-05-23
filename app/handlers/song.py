@@ -10,7 +10,6 @@ def create_song_handlers(controller: SongController):
     @blueprint.route("/create", methods=["POST"])
     @token_required
     def create(current_user):
-        print("create song files", request.files)
         return controller.create(request, current_user)
 
     @blueprint.route("/update/<int:song_id>", methods=["PUT"])
@@ -25,7 +24,7 @@ def create_song_handlers(controller: SongController):
 
     @blueprint.route("/get-all", methods=["GET"])
     @token_required
-    def get_all():
+    def get_all(_):
         return controller.get_all(request)
 
     @blueprint.route("/get-by-id/<int:song_id>", methods=["GET"])
