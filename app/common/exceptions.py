@@ -39,3 +39,8 @@ class FieldRequired(BaseAPIException):
     def __init__(self, field_name: str):
         message = f"{field_name} is required"
         super().__init__(message, HTTPStatus.BAD_REQUEST)
+
+
+class Unauthorized(BaseAPIException):
+    def __init__(self):
+        super().__init__("Unauthorized", HTTPStatus.UNAUTHORIZED)
