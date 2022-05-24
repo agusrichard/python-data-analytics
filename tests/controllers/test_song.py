@@ -21,6 +21,7 @@ from app.common.exceptions import (
 )
 
 SONG_NOT_FOUND_MESSAGE = "song not found"
+SONG_ID_REQUIRED_MESSAGE = "song_id is required"
 
 
 @pytest.fixture
@@ -103,6 +104,45 @@ def test_negative_create_song_raise_bad_request(
     )
 
 
+def test_positive_update_song(
+    mocked_song_service: SongService, mocked_request: Request, mocked_current_user: User
+):
+    song_controller = SongController(mocked_song_service)
+    song_controller.update(mocked_current_user, mocked_request, 1)
+
+    mocked_song_service.update.assert_called_once()
+
+
+def test_positive_update_song_check_request_files(
+    mocked_song_service: SongService, mocked_request: Request, mocked_current_user: User
+):
+    mocked_request.files = {
+        "song_file": mock.MagicMock(),
+        "small_thumbnail_file": mock.MagicMock(),
+        "large_thumbnail_file": mock.MagicMock(),
+    }
+
+    song_controller = SongController(mocked_song_service)
+    song_controller.update(mocked_current_user, mocked_request, 1)
+
+    mocked_song_service.update.assert_called_once()
+
+
+def test_negative_update_song_id_required(
+    mocked_song_service: SongService,
+    mocked_jsonify: Callable,
+    mocked_current_user: User,
+    mocked_request: Request,
+):
+    song_controller = SongController(mocked_song_service)
+    song_controller.update(mocked_current_user, mocked_request, None)
+
+    mocked_song_service.delete.assert_not_called()
+    mocked_jsonify.assert_called_once_with(
+        {"message": SONG_ID_REQUIRED_MESSAGE, "error_code": HTTPStatus.BAD_REQUEST}
+    )
+
+
 def test_negative_update_song_raise_field_required(
     mocked_song_service: SongService,
     mocked_request: Request,
@@ -180,6 +220,20 @@ def test_positive_delete_song(
     mocked_song_service.delete.assert_called_once()
 
 
+def test_negative_delete_song_id_required(
+    mocked_song_service: SongService,
+    mocked_jsonify: Callable,
+    mocked_current_user: User,
+):
+    song_controller = SongController(mocked_song_service)
+    song_controller.delete(mocked_current_user, None)
+
+    mocked_song_service.delete.assert_not_called()
+    mocked_jsonify.assert_called_once_with(
+        {"message": SONG_ID_REQUIRED_MESSAGE, "error_code": HTTPStatus.BAD_REQUEST}
+    )
+
+
 def test_negative_delete_song_raise_unauthorized(
     mocked_song_service: SongService,
     mocked_current_user: User,
@@ -221,6 +275,19 @@ def test_positive_song_get_by_id(
 
     mocked_song_service.get_by_id.assert_called_once()
     mocked_jsonify.assert_called_once()
+
+
+def test_negative_song_get_by_id_song_id_required(
+    mocked_song_service: SongService,
+    mocked_jsonify: Callable,
+):
+    song_controller = SongController(mocked_song_service)
+    song_controller.get_by_id(None)
+
+    mocked_song_service.get_by_id.assert_not_called()
+    mocked_jsonify.assert_called_once_with(
+        {"message": SONG_ID_REQUIRED_MESSAGE, "error_code": HTTPStatus.BAD_REQUEST}
+    )
 
 
 def test_negative_song_get_by_id_not_found(

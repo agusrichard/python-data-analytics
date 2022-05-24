@@ -42,7 +42,7 @@ class SongController:
         try:
             if song_id is None:
                 err = FieldRequiredException("song_id")
-                return err.to_dict(), err.error_code
+                return jsonify(err.to_dict()), err.error_code
 
             song_id = int(song_id)
             files = {}
@@ -66,7 +66,7 @@ class SongController:
         try:
             if song_id is None:
                 err = FieldRequiredException("song_id")
-                return err.to_dict(), err.error_code
+                return jsonify(err.to_dict()), err.error_code
 
             self.service.delete(current_user, song_id)
             return "", HTTPStatus.OK
@@ -83,6 +83,10 @@ class SongController:
 
     def get_by_id(self, song_id: Optional[int]) -> Tuple[Song, int]:
         try:
+            if song_id is None:
+                err = FieldRequiredException("song_id")
+                return jsonify(err.to_dict()), err.error_code
+
             song = self.service.get_by_id(song_id)
             return jsonify(song), HTTPStatus.OK
         except NotFoundException as e:
