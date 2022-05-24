@@ -33,7 +33,7 @@ def create_file_uploader(app: Flask) -> Callable:
                 },
             )
             return f"{app.config['S3_BUCKET_BASE_URL']}/{file.filename}"
-        except Exception as e:
+        except Exception:
             raise UploadFailedException()
 
     return upload_file
@@ -41,6 +41,9 @@ def create_file_uploader(app: Flask) -> Callable:
 
 def renaming_file(filename: str):
     uploaded_date = datetime.utcnow()
+
+    if filename is None:
+        raise BadRequestException(INVALID_FILENAME)
 
     splitted = filename.rsplit(".", 1)
     if len(splitted) < 2:

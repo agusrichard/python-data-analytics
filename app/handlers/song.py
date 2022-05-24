@@ -9,17 +9,17 @@ def create_song_handlers(controller: SongController):
 
     @blueprint.route("/create", methods=["POST"])
     @token_required
-    def create(current_user):
+    def create(current_user):  # pragma: no cover
         return controller.create(current_user, request)
 
     @blueprint.route("/update/<int:song_id>", methods=["PUT"])
     @token_required
-    def update(current_user, song_id):
+    def update(current_user, song_id):  # pragma: no cover
         return controller.update(current_user, request, song_id)
 
     @blueprint.route("/delete/<int:song_id>", methods=["DELETE"])
     @token_required
-    def delete(current_user, song_id):
+    def delete(current_user, song_id):  # pragma: no cover
         return controller.delete(current_user, song_id)
 
     @blueprint.route("/get-all", methods=["GET"])

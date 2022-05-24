@@ -242,6 +242,7 @@ def test_negative_delete_song_raise_unauthorized(
     mocked_song_service.delete.side_effect = UnauthorizedException(
         UNAUTHORIZED_TO_DELETE_SONG
     )
+
     song_controller = SongController(mocked_song_service)
     song_controller.delete(mocked_current_user, 1)
 
