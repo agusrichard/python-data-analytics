@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List, Optional
 
 from app import db
+from app.models.song import Song
 
 playlist_songs = db.Table(
     "playlist_songs",
@@ -32,6 +33,8 @@ class Playlist(db.Model):
             "id": self.id,
             "title": self.title,
             "user_id": self.user_id,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
         }
 
     @classmethod
@@ -39,7 +42,7 @@ class Playlist(db.Model):
         return cls.query.offset(skip).limit(take).all()
 
     def __repr__(self) -> str:
-        return f"Playlist('{self.title}', '{self.user_id}')"
+        return f"Playlist('{self.title}')"
 
     @classmethod
     def get_by_id(cls, playlist_id: int) -> Optional["Playlist"]:
@@ -48,3 +51,12 @@ class Playlist(db.Model):
     @classmethod
     def from_dict(cls, data: dict) -> "Playlist":
         return cls(**data)
+
+    def add_song(self, song: Song):
+        self.songs.append(song)
+
+    def remove_song(self, song: Song):
+        self.songs.remove(song)
+
+    def get_songs(self, take: int = 10, skip: int = 0) -> List["Song"]:
+        return self.songs.offset(skip).limit(take).all()
