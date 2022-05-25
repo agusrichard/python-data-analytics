@@ -38,8 +38,8 @@ class Song(db.Model):
         return f"Song('{self.title}', '{self.song_url}')"
 
     @classmethod
-    def get_by_id(cls, id: int) -> Optional["Song"]:
-        return cls.query.filter_by(id=id).first()
+    def get_by_id(cls, song_id: int) -> Optional["Song"]:
+        return cls.query.filter_by(id=song_id).first()
 
     @classmethod
     def from_dict(cls, data: dict) -> "Song":

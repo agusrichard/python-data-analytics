@@ -31,5 +31,5 @@ class AuthService:
     def register(self, data: dict):
         try:
             self.repository.create(data)
-        except IntegrityError:
-            raise DataAlreadyExists(messages.USER_ALREADY_EXISTS)
+        except IntegrityError as e:
+            raise DataAlreadyExists(messages.USER_ALREADY_EXISTS) from e
