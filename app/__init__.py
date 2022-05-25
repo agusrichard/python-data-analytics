@@ -63,6 +63,12 @@ def configure_song(app: Flask, db: SQLAlchemy):
     app.register_blueprint(song_handlers, url_prefix="/song")
 
 
+def configure_playlist(app: Flask, db: SQLAlchemy):
+    from app.models.playlist import Playlist
+
+    register_shell_context("Playlist", Playlist)
+
+
 def create_app(environment="development"):
     app = Flask(__name__)
     app.config.from_object(configurations[environment])
@@ -74,6 +80,7 @@ def create_app(environment="development"):
     configure_auth(app, db)
     configure_user(app, db)
     configure_song(app, db)
+    configure_playlist(app, db)
 
     @app.errorhandler(404)
     def resource_not_found():
