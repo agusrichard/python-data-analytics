@@ -41,3 +41,11 @@ class UserService:
 
         users = user.get_followed_users(take, skip)
         return [user.to_dict() for user in users]
+
+    def get_songs(self, user_id: int, take: int = 10, skip=0) -> List[dict]:
+        user = self.repository.get_by_id(user_id)
+        if user is None:
+            raise NotFoundException(USER_NOT_FOUND)
+
+        songs = user.get_songs(take, skip)
+        return [song.to_dict() for song in songs]

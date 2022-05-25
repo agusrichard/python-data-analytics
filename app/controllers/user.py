@@ -59,3 +59,16 @@ class UserController:
             jsonify({"followed_users": [user.to_dict() for user in users]}),
             HTTPStatus.OK,
         )
+
+    def get_songs(self, request: Request, user_id: int) -> Tuple[Response, int]:
+        take = request.args.get("take", 10, int)
+        skip = request.args.get("skip", 0, int)
+
+        try:
+            songs = self.service.get_songs(user_id, take, skip)
+            return (
+                jsonify({"songs": [song.to_dict() for song in songs]}),
+                HTTPStatus.OK,
+            )
+        except NotFoundException as e:
+            return jsonify(e.to_dict()), e.error_code

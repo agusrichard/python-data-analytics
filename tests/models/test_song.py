@@ -271,3 +271,27 @@ def test_positive_song_from_dict(db: SQLAlchemy, user: User):
     assert song.small_thumbnail_url == "test"
     assert song.large_thumbnail_url == "test"
     assert song.user_id == user.id
+
+
+def test_positive_song_to_dict(db: SQLAlchemy, user: User):
+    song = Song(
+        title="test",
+        song_url="test",
+        small_thumbnail_url="test",
+        large_thumbnail_url="test",
+        user_id=user.id,
+    )
+
+    db.session.add(song)
+    db.session.commit()
+
+    song: Song = Song.query.filter_by(title="test").first()
+    song_dict = song.to_dict()
+
+    assert song_dict["title"] == "test"
+    assert song_dict["song_url"] == "test"
+    assert song_dict["small_thumbnail_url"] == "test"
+    assert song_dict["large_thumbnail_url"] == "test"
+    assert song_dict["user_id"] == user.id
+    assert song_dict["created_at"] is not None
+    assert song_dict["updated_at"] is not None

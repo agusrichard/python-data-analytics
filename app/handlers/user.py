@@ -27,4 +27,9 @@ def create_user_handlers(controller: UserController):
     def get_followed_users(current_user):
         return controller.get_followed_users(request, current_user)
 
+    @blueprint.route("/get-songs-by-user-id/<int:user_id>", methods=["GET"])
+    @token_required
+    def get_songs(_, user_id):
+        return controller.get_songs(request, user_id)
+
     return blueprint
