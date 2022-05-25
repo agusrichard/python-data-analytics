@@ -169,3 +169,16 @@ def test_positive_get_followed_users_with_take_skip(client, login):
 
     assert response.status_code == HTTPStatus.OK
     assert len(response.json["followed_users"]) == 5
+
+
+def test_positive_get_songs_by_user_id(client):
+    client.post(REGISTER_URL, json=create_data(0))
+    response = client.post(LOGIN_URL, json=create_data(0))
+    token = response.json["token"]
+
+    response = client.get(
+        "/user/get-songs-by-user-id/1",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == HTTPStatus.OK

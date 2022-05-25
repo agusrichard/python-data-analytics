@@ -7,3 +7,7 @@ disable=
     C0415, # import outside top-level package
     c0103, # invalid-name
     W0703, # broad-except
+    R0401, # Cyclic import
+    C0411, # wrong import order
+    W0621, # redefined outer name
+    R0201, # no self use

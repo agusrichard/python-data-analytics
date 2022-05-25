@@ -146,3 +146,32 @@ def test_negative_get_followed_users_user_not_found(MockedUserRepository):
     assert str(e.value) == USER_NOT_FOUND
 
     MockedUserRepository.return_value.get_by_id.assert_called_once_with(1)
+
+
+@mock.patch("app.services.user.UserRepository")
+def test_positive_get_songs_by_user_id(MockedUserRepository):
+    MockedUserRepository.return_value.get_by_id.return_value = mock.MagicMock()
+    MockedUserRepository.return_value.get_by_id.return_value.get_songs.return_value = [
+        mock.MagicMock() for _ in range(3)
+    ]
+
+    user_service = UserService(MockedUserRepository.return_value)
+
+    songs = user_service.get_songs(1)
+
+    assert len(songs) == 3
+    MockedUserRepository.return_value.get_by_id.assert_called_once_with(1)
+    MockedUserRepository.return_value.get_by_id.return_value.get_songs.assert_called_once()
+
+
+@mock.patch("app.services.user.UserRepository")
+def test_negative_get_songs_by_user_id_user_not_found(MockedUserRepository):
+    MockedUserRepository.return_value.get_by_id.return_value = None
+
+    user_service = UserService(MockedUserRepository.return_value)
+    with pytest.raises(NotFoundException) as e:
+        user_service.get_songs(1)
+
+    assert str(e.value) == USER_NOT_FOUND
+
+    MockedUserRepository.return_value.get_by_id.assert_called_once_with(1)

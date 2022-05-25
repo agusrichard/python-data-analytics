@@ -29,8 +29,8 @@ class SongRepository:
         self.db.session.delete(song)
         self.db.session.commit()
 
-    def get_by_id(self, id: int) -> Optional[Song]:
-        return Song.get_by_id(id)
+    def get_by_id(self, song_id: int) -> Optional[Song]:
+        return Song.get_by_id(song_id)
 
     def get_all(self, take: int = 10, skip: int = 0) -> List[Song]:
         return Song.paginate(take, skip)

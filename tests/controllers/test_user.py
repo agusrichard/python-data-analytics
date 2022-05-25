@@ -134,3 +134,30 @@ def test_positive_get_followed_users(mocked_user_service, mocked_jsonify):
         mock.call("take", 10, int),
         mock.call("skip", 0, int),
     ]
+
+
+def test_positive_get_songs_by_user_id(mocked_user_service, mocked_jsonify):
+    request = mock.MagicMock()
+
+    user_controller = UserController(mocked_user_service.return_value)
+    user_controller.get_songs(request, 1)
+
+    mocked_jsonify.assert_called_once()
+    assert request.args.get.call_args_list == [
+        mock.call("take", 10, int),
+        mock.call("skip", 0, int),
+    ]
+
+
+def test_negative_get_songs_by_user_id_user_not_found(
+    mocked_user_service, mocked_jsonify
+):
+    request = mock.MagicMock()
+    err = NotFoundException(USER_NOT_FOUND)
+    mocked_user_service.return_value.get_songs.side_effect = err
+
+    user_controller = UserController(mocked_user_service.return_value)
+    user_controller.get_songs(request, 1)
+
+    mocked_user_service.return_value.get_songs.assert_called_once()
+    mocked_jsonify.assert_called_once_with(err.to_dict())

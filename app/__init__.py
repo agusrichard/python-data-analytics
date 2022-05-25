@@ -76,11 +76,11 @@ def create_app(environment="development"):
     configure_song(app, db)
 
     @app.errorhandler(404)
-    def resource_not_found(e):
+    def resource_not_found():
         return jsonify({"error": "Resource not found"})
 
     @app.errorhandler(500)
-    def internal_server_error(e):
+    def internal_server_error():
         return jsonify({"error": "Internal server error"})
 
     @app.shell_context_processor

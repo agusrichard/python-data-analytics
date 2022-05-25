@@ -191,9 +191,9 @@ def test_positive_user_get_followers(db):
     user2.follow(user)
     user2.follow(user1)
 
-    assert user.get_followers() == [user1.to_dict(), user2.to_dict()]
-    assert user1.get_followers() == [user.to_dict(), user2.to_dict()]
-    assert user2.get_followers() == [user.to_dict(), user1.to_dict()]
+    assert user.get_followers() == [user1, user2]
+    assert user1.get_followers() == [user, user2]
+    assert user2.get_followers() == [user, user1]
 
 
 def test_positive_user_get_followed_users(db):
@@ -217,9 +217,9 @@ def test_positive_user_get_followed_users(db):
 
     db.session.commit()
 
-    assert user.get_followed_users() == [user1.to_dict(), user2.to_dict()]
-    assert user1.get_followed_users() == [user.to_dict(), user2.to_dict()]
-    assert user2.get_followed_users() == [user.to_dict(), user1.to_dict()]
+    assert user.get_followed_users() == [user1, user2]
+    assert user1.get_followed_users() == [user, user2]
+    assert user2.get_followed_users() == [user, user1]
 
 
 def test_positive_user_get_followers_with_skip_take(db):
@@ -233,8 +233,8 @@ def test_positive_user_get_followers_with_skip_take(db):
 
     db.session.commit()
 
-    assert user.get_followers(skip=0, take=5) == [u.to_dict() for u in users[:5]]
-    assert user.get_followers(skip=5, take=5) == [u.to_dict() for u in users[5:]]
+    assert user.get_followers(skip=0, take=5) == users[:5]
+    assert user.get_followers(skip=5, take=5) == users[5:]
     assert user.get_followers(skip=10, take=5) == []
 
 
@@ -249,6 +249,6 @@ def test_positive_user_get_followed_users_with_skip_take(db):
 
     db.session.commit()
 
-    assert user.get_followed_users(skip=0, take=5) == [u.to_dict() for u in users[:5]]
-    assert user.get_followed_users(skip=5, take=5) == [u.to_dict() for u in users[5:]]
+    assert user.get_followed_users(skip=0, take=5) == users[:5]
+    assert user.get_followed_users(skip=5, take=5) == users[5:]
     assert user.get_followed_users(skip=10, take=5) == []

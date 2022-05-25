@@ -1,5 +1,5 @@
+from typing import Tuple
 from http import HTTPStatus
-from typing import List, Tuple
 from flask import Request, Response, jsonify
 from app.common.messages import USER_ID_REQUIRED
 from app.common.exceptions import NotFoundException
@@ -38,22 +38,37 @@ class UserController:
 
     def get_followers(
         self, request: Request, current_user: User
-    ) -> Tuple[List[User], int]:
+    ) -> Tuple[Response, int]:
         take = request.args.get("take", 10, int)
         skip = request.args.get("skip", 0, int)
 
+        users = current_user.get_followers(take, skip)
         return (
-            jsonify({"followers": current_user.get_followers(take, skip)}),
+            jsonify({"followers": [user.to_dict() for user in users]}),
             HTTPStatus.OK,
         )
 
     def get_followed_users(
         self, request: Request, current_user: User
-    ) -> Tuple[List[User], int]:
+    ) -> Tuple[Response, int]:
         take = request.args.get("take", 10, int)
         skip = request.args.get("skip", 0, int)
 
+        users = current_user.get_followed_users(take, skip)
         return (
-            jsonify({"followed_users": current_user.get_followed_users(take, skip)}),
+            jsonify({"followed_users": [user.to_dict() for user in users]}),
             HTTPStatus.OK,
         )
+
+    def get_songs(self, request: Request, user_id: int) -> Tuple[Response, int]:
+        take = request.args.get("take", 10, int)
+        skip = request.args.get("skip", 0, int)
+
+        try:
+            songs = self.service.get_songs(user_id, take, skip)
+            return (
+                jsonify({"songs": [song.to_dict() for song in songs]}),
+                HTTPStatus.OK,
+            )
+        except NotFoundException as e:
+            return jsonify(e.to_dict()), e.error_code

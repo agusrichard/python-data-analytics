@@ -95,16 +95,13 @@ class User(db.Model):
             self.followed.remove(user)
 
     def get_followers(self, take: int = 10, skip: int = 0) -> List["User"]:
-        result = self.followers.limit(take).offset(skip).all()
-        return [user.to_dict() for user in result]
+        return self.followers.limit(take).offset(skip).all()
 
     def get_followed_users(self, take: int = 10, skip: int = 0) -> List["User"]:
-        result = self.followed.limit(take).offset(skip).all()
-        return [user.to_dict() for user in result]
+        return self.followed.limit(take).offset(skip).all()
 
     def get_songs(self, take: int = 10, skip: int = 0) -> List[Song]:
-        result = self.songs.limit(take).offset(skip).all()
-        return [song.to_dict() for song in result]
+        return self.songs.limit(take).offset(skip).all()
 
     @property
     def password(self):

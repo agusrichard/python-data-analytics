@@ -13,8 +13,8 @@ class UserRepository:
         self.db.session.add(user)
         self.db.session.commit()
 
-    def update(self, id, data) -> None:
-        user = self.get_by_id(id)
+    def update(self, user_id, data) -> None:
+        user = self.get_by_id(user_id)
         if not user:
             return None
 
@@ -25,11 +25,13 @@ class UserRepository:
 
         self.db.session.commit()
 
+        return None
+
     def get_all(self, take: int = 10, skip: int = 0) -> List[User]:
         return User.query.limit(take).offset(skip).all()
 
-    def get_by_id(self, id: int) -> Optional[User]:
-        return User.query.get(id)
+    def get_by_id(self, user_id: int) -> Optional[User]:
+        return User.query.get(user_id)
 
     def get_by_email(self, email: str) -> Optional[User]:
         return User.query.filter_by(email=email).first()
