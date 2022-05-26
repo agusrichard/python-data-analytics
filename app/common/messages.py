@@ -10,3 +10,7 @@ FAILED_TO_UPLOAD = "Failed to upload"
 INVALID_FILENAME = "Invalid filename"
 UNAUTHORIZED_TO_UPDATE_SONG = "You are not authorized to update this song"
 UNAUTHORIZED_TO_DELETE_SONG = "You are not authorized to delete this song"
+PLAYLIST_NOT_FOUND = "Playlist not found"
+UNAUTHORIZED_ADD_SONG_TO_PLAYLIST = (
+    "You are not authorized to add song to this playlist"
+)
