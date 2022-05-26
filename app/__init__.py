@@ -65,8 +65,21 @@ def configure_song(app: Flask, db: SQLAlchemy):
 
 def configure_playlist(app: Flask, db: SQLAlchemy):
     from app.models.playlist import Playlist
+    from app.repositories.playlist import PlaylistRepository
+    from app.repositories.song import SongRepository
+    from app.services.playlist import PlaylistService
+    from app.controllers.playlist import PlaylistController
+    from app.handlers.playlist import create_playlist_handler
 
     register_shell_context("Playlist", Playlist)
+
+    # Configuring playlist
+    playlist_repository = PlaylistRepository(db)
+    song_repository = SongRepository(db)
+    playlist_service = PlaylistService(playlist_repository, song_repository)
+    playlist_controller = PlaylistController(playlist_service)
+    playlist_handler = create_playlist_handler(playlist_controller)
+    app.register_blueprint(playlist_handler, url_prefix="/playlist")
 
 
 def create_app(environment="development"):

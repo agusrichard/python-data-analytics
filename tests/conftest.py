@@ -30,3 +30,13 @@ def db(app: Flask):
 @pytest.fixture
 def client(app: Flask, db: SQLAlchemy):
     return app.test_client()
+
+
+@pytest.fixture
+def mocked_current_user():
+    yield mock.MagicMock()
+
+
+@pytest.fixture
+def mocked_request():
+    yield mock.MagicMock()

@@ -1,19 +1,20 @@
 from typing import List, Dict
-from app.common.messages import (
-    PLAYLIST_NOT_FOUND,
-    SONG_NOT_FOUND,
-    UNAUTHORIZED_ADD_SONG_TO_PLAYLIST,
-    UNAUTHORIZED_TO_UPDATE_SONG,
-)
 
 from app.models.user import User
-from app.models.playlist import Playlist
 from app.repositories.song import SongRepository
 from app.repositories.playlist import PlaylistRepository
 from app.common.exceptions import (
     FieldRequiredException,
     NotFoundException,
     UnauthorizedException,
+)
+from app.common.messages import (
+    SONG_NOT_FOUND,
+    PLAYLIST_NOT_FOUND,
+    UNAUTHORIZED_TO_DELETE_PLAYLIST,
+    UNAUTHORIZED_TO_UPDATE_PLAYLIST,
+    UNAUTHORIZED_ADD_SONG_TO_PLAYLIST,
+    UNAUTHORIZED_REMOVE_SONG_FROM_PLAYLIST,
 )
 
 
@@ -36,7 +37,7 @@ class PlaylistService:
             raise NotFoundException(PLAYLIST_NOT_FOUND)
 
         if current_user.id != playlist.user_id:
-            raise UnauthorizedException(UNAUTHORIZED_TO_UPDATE_SONG)
+            raise UnauthorizedException(UNAUTHORIZED_TO_UPDATE_PLAYLIST)
 
         self.playlist_repository.update(playlist, data)
 
@@ -46,18 +47,23 @@ class PlaylistService:
             raise NotFoundException(PLAYLIST_NOT_FOUND)
 
         if current_user.id != playlist.user_id:
-            raise UnauthorizedException(UNAUTHORIZED_TO_UPDATE_SONG)
+            raise UnauthorizedException(UNAUTHORIZED_TO_DELETE_PLAYLIST)
 
         self.playlist_repository.delete(playlist)
 
-    def get_by_id(self, playlist_id: int) -> Playlist:
+    def get_by_id(
+        self, playlist_id: int, take_songs: int = 10, skip_songs: int = 0
+    ) -> dict:
         playlist = self.playlist_repository.get_by_id(playlist_id)
         if playlist is None:
             raise NotFoundException(PLAYLIST_NOT_FOUND)
 
-        return playlist.to_dict()
+        playlist_dict = playlist.to_dict()
+        songs = playlist.get_songs(take_songs, skip_songs)
+        playlist_dict["songs"] = [song.to_dict() for song in songs]
+        return playlist_dict
 
-    def get_all(self, take: int = 10, skip: int = 0) -> List[Playlist]:
+    def get_all(self, take: int = 10, skip: int = 0) -> List[dict]:
         playlists = self.playlist_repository.get_all(take, skip)
         return [playlist.to_dict() for playlist in playlists]
 
@@ -81,7 +87,7 @@ class PlaylistService:
             raise NotFoundException(PLAYLIST_NOT_FOUND)
 
         if playlist.user_id != current_user.id:
-            raise UnauthorizedException(UNAUTHORIZED_ADD_SONG_TO_PLAYLIST)
+            raise UnauthorizedException(UNAUTHORIZED_REMOVE_SONG_FROM_PLAYLIST)
 
         song = self.song_repository.get_by_id(song_id)
         if song is None:
