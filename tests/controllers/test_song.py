@@ -1,13 +1,8 @@
-from http import HTTPStatus
 import pytest
 from flask import Request
 from unittest import mock
+from http import HTTPStatus
 from typing import Callable
-from app.common.messages import (
-    FAILED_TO_UPLOAD,
-    UNAUTHORIZED_TO_DELETE_SONG,
-    UNAUTHORIZED_TO_UPDATE_SONG,
-)
 
 from app.models.user import User
 from app.services.song import SongService
@@ -20,13 +15,19 @@ from app.common.exceptions import (
     UploadFailedException,
 )
 
+from app.common.messages import (
+    FAILED_TO_UPLOAD,
+    UNAUTHORIZED_TO_DELETE_SONG,
+    UNAUTHORIZED_TO_UPDATE_SONG,
+)
+
 SONG_NOT_FOUND_MESSAGE = "song not found"
 SONG_ID_REQUIRED_MESSAGE = "song_id is required"
 
 
 @pytest.fixture
 def mocked_song_service():
-    with mock.patch("app.controllers.song.SongController") as MockedSongService:
+    with mock.patch("app.controllers.song.SongService") as MockedSongService:
         yield MockedSongService.return_value
 
 
@@ -34,16 +35,6 @@ def mocked_song_service():
 def mocked_jsonify():
     with mock.patch("app.controllers.song.jsonify") as mocked_jsonify_:
         yield mocked_jsonify_
-
-
-@pytest.fixture
-def mocked_current_user():
-    yield mock.MagicMock()
-
-
-@pytest.fixture
-def mocked_request():
-    yield mock.MagicMock()
 
 
 def test_positive_create_song(
