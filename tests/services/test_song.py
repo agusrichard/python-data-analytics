@@ -365,3 +365,49 @@ def test_positive_get_all_with_take_skip(
     song_service.get_all(10, 10)
 
     mocked_song_repository.get_all.assert_called_once_with(10, 10)
+
+
+def test_positive_private_create(
+    mocked_app: Flask,
+    mocked_song_repository: SongRepository,
+    mocked_upload_file: Callable,
+):
+    data = {
+        "title": "test",
+    }
+    files = {
+        "song_file": mock.MagicMock(),
+        "small_thumbnail_file": mock.MagicMock(),
+        "large_thumbnail_file": mock.MagicMock(),
+    }
+
+    song_service = SongService(mocked_app, mocked_song_repository, mocked_upload_file)
+
+    song_service._create(files, data)
+
+    mocked_app.app_context.assert_called_once()
+    mocked_song_repository.create.assert_called_once()
+    assert mocked_upload_file.call_count == 3
+
+
+def test_positive_private_update(
+    mocked_app: Flask,
+    mocked_song_repository: SongRepository,
+    mocked_upload_file: Callable,
+):
+    data = {
+        "title": "test",
+    }
+    files = {
+        "song_file": mock.MagicMock(),
+        "small_thumbnail_file": mock.MagicMock(),
+        "large_thumbnail_file": mock.MagicMock(),
+    }
+
+    song_service = SongService(mocked_app, mocked_song_repository, mocked_upload_file)
+
+    song_service._update(1, files, data)
+
+    mocked_app.app_context.assert_called_once()
+    mocked_song_repository.update.assert_called_once()
+    assert mocked_upload_file.call_count == 3

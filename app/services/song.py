@@ -35,10 +35,10 @@ class SongService:
             raise FieldRequiredException("song_file")
 
         files = process_files_to_streams(files)
-        thread = Thread(target=self.__create, args=(files, song_data))
+        thread = Thread(target=self._create, args=(files, song_data))
         thread.start()
 
-    def __create(self, files: dict, song_data: dict) -> None:
+    def _create(self, files: dict, song_data: dict) -> None:
         with self.app.app_context():
             for key, file in files.items():
                 key_data = key.replace("file", "url")
@@ -61,10 +61,10 @@ class SongService:
             raise UnauthorizedException(UNAUTHORIZED_TO_UPDATE_SONG)
 
         files = process_files_to_streams(files)
-        thread = Thread(target=self.__update, args=(song_id, files, song_data))
+        thread = Thread(target=self._update, args=(song_id, files, song_data))
         thread.start()
 
-    def __update(self, song_id: int, files: dict, song_data: dict) -> None:
+    def _update(self, song_id: int, files: dict, song_data: dict) -> None:
         with self.app.app_context():
             for key, file in files.items():
                 key_data = key.replace("file", "url")
