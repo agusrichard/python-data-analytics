@@ -1,5 +1,5 @@
-from typing import List, Tuple
 import pytest
+from typing import List, Tuple
 from flask_sqlalchemy import SQLAlchemy
 
 from app.models.user import User

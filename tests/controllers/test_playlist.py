@@ -12,7 +12,6 @@ from app.common.exceptions import (
     UnauthorizedException,
 )
 from app.common.messages import (
-    SONG_NOT_FOUND,
     PLAYLIST_NOT_FOUND,
     UNAUTHORIZED_TO_DELETE_PLAYLIST,
     UNAUTHORIZED_TO_UPDATE_PLAYLIST,
@@ -284,7 +283,7 @@ def test_negative_playlist_remove_song_unauthorized(
     mocked_jsonify: Callable,
 ):
     mocked_playlist_service.remove_song.side_effect = UnauthorizedException(
-        UNAUTHORIZED_ADD_SONG_TO_PLAYLIST
+        UNAUTHORIZED_REMOVE_SONG_FROM_PLAYLIST
     )
 
     playlist_controller = PlaylistController(mocked_playlist_service)

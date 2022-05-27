@@ -1,7 +1,6 @@
 import pytest
 from unittest import mock
 
-from app.models.user import User
 from app.repositories.song import SongRepository
 from app.services.playlist import PlaylistService
 from app.repositories.playlist import PlaylistRepository

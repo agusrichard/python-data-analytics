@@ -1,6 +1,5 @@
 import pytest
 from unittest import mock
-from sqlalchemy.exc import IntegrityError
 
 from app.services.auth import AuthService
 from app.common.messages import WRONG_EMAIL_PASSWORD, USER_ALREADY_EXISTS
