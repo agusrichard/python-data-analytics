@@ -1,7 +1,9 @@
+import io
 import boto3
+import base64
 from flask import Flask
-from typing import Callable
 from datetime import datetime
+from typing import Callable, Dict
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 
@@ -19,20 +21,24 @@ def create_file_uploader(app: Flask) -> Callable:
         aws_secret_access_key=app.config["AWS_ACCESS_SECRET"],
     )
 
-    def upload_file(file: FileStorage) -> str:
+    def upload_file(data: dict) -> str:
         """
         Upload a file to AWS S3
         """
         try:
+            data["stream"] = base64.b64decode(data["stream"])
+            data["stream"] = io.BytesIO(data["stream"])
+            file = FileStorage(**data)
+
             s3.upload_fileobj(
                 file,
                 app.config["S3_BUCKET_NAME"],
-                file.filename,
+                data["filename"],
                 ExtraArgs={
-                    "ContentType": file.content_type,
+                    "ContentType": data["content_type"],
                 },
             )
-            return f"{app.config['S3_BUCKET_BASE_URL']}/{file.filename}"
+            return f"{app.config['S3_BUCKET_BASE_URL']}/{data['filename']}"
         except Exception:
             raise UploadFailedException()
 
@@ -56,3 +62,25 @@ def renaming_file(filename: str):
     updated_filename = f"{updated_filename}.{file_extension}"
 
     return updated_filename
+
+
+def process_files_to_streams(files: Dict[str, FileStorage]) -> dict:
+    """
+    Process a file to a base64 string
+    """
+    result = {}
+
+    for key, file in files.items():
+        if file is None or file.filename == "":
+            continue  # skip not required fields/files
+
+        result[key] = {
+            "stream": base64.b64encode(file.stream.read()),
+            "name": file.name,
+            "filename": renaming_file(file.filename),
+            "content_type": file.content_type,
+            "content_length": file.content_length,
+            "headers": {header[0]: header[1] for header in file.headers},
+        }
+
+    return result

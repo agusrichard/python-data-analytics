@@ -57,7 +57,7 @@ def configure_song(app: Flask, db: SQLAlchemy):
 
     # Configuring song
     song_repository = SongRepository(db)
-    song_service = SongService(song_repository, upload_file)
+    song_service = SongService(app, song_repository, upload_file)
     song_controller = SongController(song_service)
     song_handlers = create_song_handlers(song_controller)
     app.register_blueprint(song_handlers, url_prefix="/song")
