@@ -1,4 +1,6 @@
+import io
 import boto3
+import base64
 from flask import Flask
 from typing import Callable
 from datetime import datetime
@@ -19,20 +21,24 @@ def create_file_uploader(app: Flask) -> Callable:
         aws_secret_access_key=app.config["AWS_ACCESS_SECRET"],
     )
 
-    def upload_file(file: FileStorage) -> str:
+    def upload_file(data: dict) -> str:
         """
         Upload a file to AWS S3
         """
         try:
+            data["stream"] = base64.b64decode(data["stream"])
+            data["stream"] = io.BytesIO(data["stream"])
+            file = FileStorage(**data)
+
             s3.upload_fileobj(
                 file,
                 app.config["S3_BUCKET_NAME"],
-                file.filename,
+                data["filename"],
                 ExtraArgs={
-                    "ContentType": file.content_type,
+                    "ContentType": data["content_type"],
                 },
             )
-            return f"{app.config['S3_BUCKET_BASE_URL']}/{file.filename}"
+            return f"{app.config['S3_BUCKET_BASE_URL']}/{data['filename']}"
         except Exception:
             raise UploadFailedException()
 
