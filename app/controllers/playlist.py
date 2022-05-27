@@ -1,6 +1,6 @@
 from http import HTTPStatus
 from typing import Tuple, Optional
-from flask import Response, Request, jsonify
+from flask import Response, jsonify, request
 
 from app.models.user import User
 from app.services.playlist import PlaylistService
@@ -15,7 +15,7 @@ class PlaylistController:
     def __init__(self, service: PlaylistService) -> None:
         self.service = service
 
-    def create(self, current_user: User, request: Request) -> Tuple[Response, int]:
+    def create(self, current_user: User) -> Tuple[Response, int]:
         try:
             data = request.form.to_dict()
             data["user_id"] = current_user.id
@@ -25,7 +25,7 @@ class PlaylistController:
             return jsonify(e.to_dict()), e.error_code
 
     def update(
-        self, current_user: User, request: Request, playlist_id: Optional[int]
+        self, current_user: User, playlist_id: Optional[int]
     ) -> Tuple[Response, int]:
         try:
             if playlist_id is None:
@@ -57,15 +57,13 @@ class PlaylistController:
         except NotFoundException as e:
             return jsonify(e.to_dict()), e.error_code
 
-    def get_all(self, request: Request) -> Tuple[Response, int]:
+    def get_all(self, *args) -> Tuple[Response, int]:
         take = request.args.get("take", 10, int)
         skip = request.args.get("skip", 0, int)
 
         return jsonify(self.service.get_all(take, skip)), HTTPStatus.OK
 
-    def get_by_id(
-        self, request: Request, playlist_id: Optional[int]
-    ) -> Tuple[Response, int]:
+    def get_by_id(self, _, playlist_id: Optional[int]) -> Tuple[Response, int]:
         take = request.args.get("take", 10, int)
         skip = request.args.get("skip", 0, int)
 
