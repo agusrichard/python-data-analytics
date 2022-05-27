@@ -40,13 +40,15 @@ def test_positive_create_file_uploader(mock_boto3):
     mocked_app = mock.MagicMock()
     mocked_app.config.__getitem__.side_effect = config.__getitem__
 
-    mocked_file = mock.MagicMock()
-    mocked_file.filename = FILENAME_TEST
-    mocked_file.content_type = "audio/mpeg"
+    data = {
+        "stream": "test",
+        "filename": FILENAME_TEST,
+        "content_type": "audio/mp3",
+    }
 
     uploader = create_file_uploader(mocked_app)
     assert uploader is not None
-    assert uploader(mocked_file) == "https://test.com/test.mp3"
+    assert uploader(data) == "https://test.com/test.mp3"
 
 
 @mock.patch("app.common.file.boto3")

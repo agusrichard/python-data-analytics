@@ -5,8 +5,8 @@ from typing import Callable, List, Dict
 from werkzeug.datastructures import FileStorage
 
 from app.models.user import User
-from app.common.file import renaming_file
 from app.repositories.song import SongRepository
+from app.common.file import process_files_to_streams
 from app.common.exceptions import (
     NotFoundException,
     UnauthorizedException,
@@ -34,7 +34,7 @@ class SongService:
         if "song_file" not in files or not files["song_file"]:
             raise FieldRequiredException("song_file")
 
-        files = self.__preprocess_files(files)
+        files = process_files_to_streams(files)
         thread = Thread(target=self.__create, args=(files, song_data))
         thread.start()
 
@@ -60,7 +60,7 @@ class SongService:
         if current_user.id != song.user_id:
             raise UnauthorizedException(UNAUTHORIZED_TO_UPDATE_SONG)
 
-        files = self.__preprocess_files(files)
+        files = process_files_to_streams(files)
         thread = Thread(target=self.__update, args=(song_id, files, song_data))
         thread.start()
 
@@ -93,22 +93,3 @@ class SongService:
     def get_all(self, take: int = 10, skip: int = 0) -> List[dict]:
         songs = self.repository.get_all(take, skip)
         return [song.to_dict() for song in songs]
-
-    @staticmethod
-    def __preprocess_files(files: Dict[str, FileStorage]) -> dict:
-        result = {}
-
-        for key, file in files.items():
-            if file is None or file.filename == "":
-                continue  # skip not required fields/files
-
-            result[key] = {
-                "stream": base64.b64encode(file.stream.read()),
-                "name": file.name,
-                "filename": renaming_file(file.filename),
-                "content_type": file.content_type,
-                "content_length": file.content_length,
-                "headers": {header[0]: header[1] for header in file.headers},
-            }
-
-        return result
