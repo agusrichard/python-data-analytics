@@ -49,7 +49,7 @@ def configure_song(app: Flask, db: SQLAlchemy):
     from app.repositories.song import SongRepository
     from app.services.song import SongService
     from app.controllers.song import SongController
-    from app.handlers.song import create_song_handlers
+    from app.handlers.song import SongHandler
     from app.common.file import create_file_uploader
 
     register_shell_context("Song", Song)
@@ -59,8 +59,8 @@ def configure_song(app: Flask, db: SQLAlchemy):
     song_repository = SongRepository(db)
     song_service = SongService(app, song_repository, upload_file)
     song_controller = SongController(song_service)
-    song_handlers = create_song_handlers(song_controller)
-    app.register_blueprint(song_handlers, url_prefix="/song")
+    song_handler = SongHandler(song_controller)
+    app.register_blueprint(song_handler.blueprint, url_prefix="/song")
 
 
 def configure_playlist(app: Flask, db: SQLAlchemy):

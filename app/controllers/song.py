@@ -1,6 +1,6 @@
 from http import HTTPStatus
 from typing import List, Tuple, Optional
-from flask import Response, Request, jsonify
+from flask import Response, jsonify, request
 
 from app.models.song import Song
 from app.models.user import User
@@ -18,7 +18,7 @@ class SongController:
     def __init__(self, service: SongService):
         self.service = service
 
-    def create(self, current_user: User, request: Request) -> Tuple[Response, int]:
+    def create(self, current_user: User) -> Tuple[Response, int]:
         try:
             files = {
                 "song_file": request.files.get("song_file", None),
@@ -37,7 +37,7 @@ class SongController:
             return jsonify(e.to_dict()), e.error_code
 
     def update(
-        self, current_user: User, request: Request, song_id: Optional[int]
+        self, current_user: User, song_id: Optional[int]
     ) -> Tuple[Response, int]:
         try:
             if song_id is None:
@@ -75,13 +75,13 @@ class SongController:
         except NotFoundException as e:
             return jsonify(e.to_dict()), e.error_code
 
-    def get_all(self, request: Request) -> Tuple[List[Song], int]:
+    def get_all(self, *args) -> Tuple[List[Song], int]:
         take = request.args.get("take", 10, int)
         skip = request.args.get("skip", 0, int)
 
         return jsonify(self.service.get_all(take, skip)), HTTPStatus.OK
 
-    def get_by_id(self, song_id: Optional[int]) -> Tuple[Song, int]:
+    def get_by_id(self, _, song_id: Optional[int]) -> Tuple[Song, int]:
         try:
             if song_id is None:
                 err = FieldRequiredException("song_id")
