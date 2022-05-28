@@ -37,13 +37,26 @@ def mocked_jsonify():
         yield mocked_jsonify_
 
 
+@pytest.fixture
+def mocked_request():
+    m = mock.MagicMock()
+    with mock.patch("app.controllers.song.request", m) as mocked_request_:
+        yield mocked_request_
+
+
 def test_positive_create_song(
     mocked_song_service: SongService, mocked_request: Request, mocked_current_user: User
 ):
     song_controller = SongController(mocked_song_service)
-    song_controller.create(mocked_request, mocked_current_user)
+    _, status_code = song_controller.create(mocked_current_user)
 
     mocked_song_service.create.assert_called_once()
+    assert status_code == HTTPStatus.CREATED
+    assert mocked_request.files.get.call_args_list == [
+        mock.call("song_file", None),
+        mock.call("small_thumbnail_file", None),
+        mock.call("large_thumbnail_file", None),
+    ]
 
 
 def test_negative_create_song_raise_field_required(
@@ -52,14 +65,21 @@ def test_negative_create_song_raise_field_required(
     mocked_current_user: User,
     mocked_jsonify: Callable,
 ):
-    mocked_song_service.create.side_effect = FieldRequiredException("title")
+    err = FieldRequiredException("title")
+    mocked_song_service.create.side_effect = err
     song_controller = SongController(mocked_song_service)
-    song_controller.create(mocked_request, mocked_current_user)
+    _, status_code = song_controller.create(mocked_current_user)
 
     mocked_song_service.create.assert_called_once()
     mocked_jsonify.assert_called_once_with(
         {"message": "title is required", "error_code": HTTPStatus.BAD_REQUEST}
     )
+    assert status_code == err.error_code
+    assert mocked_request.files.get.call_args_list == [
+        mock.call("song_file", None),
+        mock.call("small_thumbnail_file", None),
+        mock.call("large_thumbnail_file", None),
+    ]
 
 
 def test_negative_create_song_raise_upload_failed(
@@ -68,14 +88,21 @@ def test_negative_create_song_raise_upload_failed(
     mocked_current_user: User,
     mocked_jsonify: Callable,
 ):
-    mocked_song_service.create.side_effect = UploadFailedException()
+    err = UploadFailedException()
+    mocked_song_service.create.side_effect = err
     song_controller = SongController(mocked_song_service)
-    song_controller.create(mocked_request, mocked_current_user)
+    _, status_code = song_controller.create(mocked_current_user)
 
     mocked_song_service.create.assert_called_once()
     mocked_jsonify.assert_called_once_with(
         {"message": FAILED_TO_UPLOAD, "error_code": HTTPStatus.INTERNAL_SERVER_ERROR}
     )
+    assert status_code == err.error_code
+    assert mocked_request.files.get.call_args_list == [
+        mock.call("song_file", None),
+        mock.call("small_thumbnail_file", None),
+        mock.call("large_thumbnail_file", None),
+    ]
 
 
 def test_negative_create_song_raise_bad_request(
@@ -85,23 +112,32 @@ def test_negative_create_song_raise_bad_request(
     mocked_jsonify: Callable,
 ):
     message = "test bad request"
-    mocked_song_service.create.side_effect = BadRequestException(message)
+    err = BadRequestException(message)
+    mocked_song_service.create.side_effect = err
     song_controller = SongController(mocked_song_service)
-    song_controller.create(mocked_request, mocked_current_user)
+    _, status_code = song_controller.create(mocked_current_user)
 
     mocked_song_service.create.assert_called_once()
     mocked_jsonify.assert_called_once_with(
         {"message": message, "error_code": HTTPStatus.BAD_REQUEST}
     )
+    assert status_code == err.error_code
+    assert mocked_request.files.get.call_args_list == [
+        mock.call("song_file", None),
+        mock.call("small_thumbnail_file", None),
+        mock.call("large_thumbnail_file", None),
+    ]
 
 
 def test_positive_update_song(
     mocked_song_service: SongService, mocked_request: Request, mocked_current_user: User
 ):
     song_controller = SongController(mocked_song_service)
-    song_controller.update(mocked_current_user, mocked_request, 1)
+    _, status_code = song_controller.update(mocked_current_user, 1)
 
     mocked_song_service.update.assert_called_once()
+    mocked_request.files.items.assert_called_once()
+    assert status_code == HTTPStatus.OK
 
 
 def test_positive_update_song_check_request_files(
@@ -114,9 +150,10 @@ def test_positive_update_song_check_request_files(
     }
 
     song_controller = SongController(mocked_song_service)
-    song_controller.update(mocked_current_user, mocked_request, 1)
+    _, status_code = song_controller.update(mocked_current_user, 1)
 
     mocked_song_service.update.assert_called_once()
+    assert status_code == HTTPStatus.OK
 
 
 def test_negative_update_song_id_required(
@@ -126,12 +163,14 @@ def test_negative_update_song_id_required(
     mocked_request: Request,
 ):
     song_controller = SongController(mocked_song_service)
-    song_controller.update(mocked_current_user, mocked_request, None)
+    _, status_code = song_controller.update(mocked_current_user, None)
 
     mocked_song_service.delete.assert_not_called()
     mocked_jsonify.assert_called_once_with(
         {"message": SONG_ID_REQUIRED_MESSAGE, "error_code": HTTPStatus.BAD_REQUEST}
     )
+    mocked_request.files.items.assert_not_called()
+    assert status_code == HTTPStatus.BAD_REQUEST
 
 
 def test_negative_update_song_raise_field_required(
@@ -140,16 +179,17 @@ def test_negative_update_song_raise_field_required(
     mocked_current_user: User,
     mocked_jsonify: Callable,
 ):
-    mocked_song_service.update.side_effect = UnauthorizedException(
-        UNAUTHORIZED_TO_UPDATE_SONG
-    )
+    err = UnauthorizedException(UNAUTHORIZED_TO_UPDATE_SONG)
+    mocked_song_service.update.side_effect = err
     song_controller = SongController(mocked_song_service)
-    song_controller.update(mocked_current_user, mocked_request, 1)
+    _, status_code = song_controller.update(mocked_current_user, 1)
 
     mocked_song_service.update.assert_called_once()
     mocked_jsonify.assert_called_once_with(
         {"message": UNAUTHORIZED_TO_UPDATE_SONG, "error_code": HTTPStatus.UNAUTHORIZED}
     )
+    mocked_request.files.items.assert_called_once()
+    assert status_code == err.error_code
 
 
 def test_negative_update_song_raise_not_found(
@@ -158,14 +198,17 @@ def test_negative_update_song_raise_not_found(
     mocked_current_user: User,
     mocked_jsonify: Callable,
 ):
-    mocked_song_service.update.side_effect = NotFoundException(SONG_NOT_FOUND_MESSAGE)
+    err = NotFoundException(SONG_NOT_FOUND_MESSAGE)
+    mocked_song_service.update.side_effect = err
     song_controller = SongController(mocked_song_service)
-    song_controller.update(mocked_current_user, mocked_request, 1)
+    _, status_code = song_controller.update(mocked_current_user, 1)
 
     mocked_song_service.update.assert_called_once()
     mocked_jsonify.assert_called_once_with(
         {"message": SONG_NOT_FOUND_MESSAGE, "error_code": HTTPStatus.NOT_FOUND}
     )
+    mocked_request.files.items.assert_called_once()
+    assert status_code == err.error_code
 
 
 def test_negative_update_song_raise_upload_failed(
@@ -174,14 +217,17 @@ def test_negative_update_song_raise_upload_failed(
     mocked_current_user: User,
     mocked_jsonify: Callable,
 ):
-    mocked_song_service.update.side_effect = UploadFailedException()
+    err = UploadFailedException()
+    mocked_song_service.update.side_effect = err
     song_controller = SongController(mocked_song_service)
-    song_controller.update(mocked_current_user, mocked_request, 1)
+    _, status_code = song_controller.update(mocked_current_user, 1)
 
     mocked_song_service.update.assert_called_once()
     mocked_jsonify.assert_called_once_with(
         {"message": FAILED_TO_UPLOAD, "error_code": HTTPStatus.INTERNAL_SERVER_ERROR}
     )
+    mocked_request.files.items.assert_called_once()
+    assert status_code == err.error_code
 
 
 def test_negative_update_song_raise_bad_request(
@@ -191,14 +237,17 @@ def test_negative_update_song_raise_bad_request(
     mocked_jsonify: Callable,
 ):
     message = "test bad request"
-    mocked_song_service.update.side_effect = BadRequestException(message)
+    err = BadRequestException(message)
+    mocked_song_service.update.side_effect = err
     song_controller = SongController(mocked_song_service)
-    song_controller.update(mocked_current_user, mocked_request, 1)
+    _, status_code = song_controller.update(mocked_current_user, 1)
 
     mocked_song_service.update.assert_called_once()
     mocked_jsonify.assert_called_once_with(
         {"message": message, "error_code": HTTPStatus.BAD_REQUEST}
     )
+    mocked_request.files.items.assert_called_once()
+    assert status_code == err.error_code
 
 
 def test_positive_delete_song(
@@ -206,9 +255,10 @@ def test_positive_delete_song(
     mocked_current_user: User,
 ):
     song_controller = SongController(mocked_song_service)
-    song_controller.delete(mocked_current_user, 1)
+    _, status_code = song_controller.delete(mocked_current_user, 1)
 
     mocked_song_service.delete.assert_called_once()
+    assert status_code == HTTPStatus.OK
 
 
 def test_negative_delete_song_id_required(
@@ -217,12 +267,13 @@ def test_negative_delete_song_id_required(
     mocked_current_user: User,
 ):
     song_controller = SongController(mocked_song_service)
-    song_controller.delete(mocked_current_user, None)
+    _, status_code = song_controller.delete(mocked_current_user, None)
 
     mocked_song_service.delete.assert_not_called()
     mocked_jsonify.assert_called_once_with(
         {"message": SONG_ID_REQUIRED_MESSAGE, "error_code": HTTPStatus.BAD_REQUEST}
     )
+    assert status_code == HTTPStatus.BAD_REQUEST
 
 
 def test_negative_delete_song_raise_unauthorized(
@@ -230,17 +281,17 @@ def test_negative_delete_song_raise_unauthorized(
     mocked_current_user: User,
     mocked_jsonify: Callable,
 ):
-    mocked_song_service.delete.side_effect = UnauthorizedException(
-        UNAUTHORIZED_TO_DELETE_SONG
-    )
+    err = UnauthorizedException(UNAUTHORIZED_TO_DELETE_SONG)
+    mocked_song_service.delete.side_effect = err
 
     song_controller = SongController(mocked_song_service)
-    song_controller.delete(mocked_current_user, 1)
+    _, status_code = song_controller.delete(mocked_current_user, 1)
 
     mocked_song_service.delete.assert_called_once()
     mocked_jsonify.assert_called_once_with(
         {"message": UNAUTHORIZED_TO_DELETE_SONG, "error_code": HTTPStatus.UNAUTHORIZED}
     )
+    assert status_code == err.error_code
 
 
 def test_negative_delete_song_raise_not_found(
@@ -248,49 +299,55 @@ def test_negative_delete_song_raise_not_found(
     mocked_current_user: User,
     mocked_jsonify: Callable,
 ):
-    mocked_song_service.delete.side_effect = NotFoundException(SONG_NOT_FOUND_MESSAGE)
+    err = NotFoundException(SONG_NOT_FOUND_MESSAGE)
+    mocked_song_service.delete.side_effect = err
     song_controller = SongController(mocked_song_service)
-    song_controller.delete(mocked_current_user, 1)
+    _, status_code = song_controller.delete(mocked_current_user, 1)
 
     mocked_song_service.delete.assert_called_once()
     mocked_jsonify.assert_called_once_with(
         {"message": SONG_NOT_FOUND_MESSAGE, "error_code": HTTPStatus.NOT_FOUND}
     )
+    assert status_code == err.error_code
 
 
 def test_positive_song_get_by_id(
     mocked_song_service: SongService,
     mocked_jsonify: Callable,
+    mocked_current_user: User,
 ):
     song_controller = SongController(mocked_song_service)
-    song_controller.get_by_id(1)
+    _, status_code = song_controller.get_by_id(mocked_current_user, 1)
 
     mocked_song_service.get_by_id.assert_called_once()
     mocked_jsonify.assert_called_once()
+    assert status_code == HTTPStatus.OK
 
 
 def test_negative_song_get_by_id_song_id_required(
     mocked_song_service: SongService,
     mocked_jsonify: Callable,
+    mocked_current_user: User,
 ):
     song_controller = SongController(mocked_song_service)
-    song_controller.get_by_id(None)
+    _, status_code = song_controller.get_by_id(mocked_current_user, None)
 
     mocked_song_service.get_by_id.assert_not_called()
     mocked_jsonify.assert_called_once_with(
         {"message": SONG_ID_REQUIRED_MESSAGE, "error_code": HTTPStatus.BAD_REQUEST}
     )
+    assert status_code == HTTPStatus.BAD_REQUEST
 
 
 def test_negative_song_get_by_id_not_found(
     mocked_song_service: SongService,
     mocked_jsonify: Callable,
+    mocked_current_user: User,
 ):
-    mocked_song_service.get_by_id.side_effect = NotFoundException(
-        SONG_NOT_FOUND_MESSAGE
-    )
+    err = NotFoundException(SONG_NOT_FOUND_MESSAGE)
+    mocked_song_service.get_by_id.side_effect = err
     song_controller = SongController(mocked_song_service)
-    song_controller.get_by_id(1)
+    _, status_code = song_controller.get_by_id(mocked_current_user, 1)
 
     mocked_song_service.get_by_id.assert_called_once()
     mocked_jsonify.assert_called_once_with(
@@ -304,7 +361,12 @@ def test_positive_song_get_all(
     mocked_request: Request,
 ):
     song_controller = SongController(mocked_song_service)
-    song_controller.get_all(mocked_request)
+    _, status_code = song_controller.get_all(mocked_request)
 
     mocked_song_service.get_all.assert_called_once()
     mocked_jsonify.assert_called_once()
+    assert status_code == HTTPStatus.OK
+    assert mocked_request.args.get.call_args_list == [
+        mock.call("take", 10, int),
+        mock.call("skip", 0, int),
+    ]

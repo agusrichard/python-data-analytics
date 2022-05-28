@@ -4,32 +4,37 @@ from app.common.token import token_required
 from app.controllers.song import SongController
 
 
-def create_song_handlers(controller: SongController):
-    blueprint = Blueprint("song", __name__)
+class SongHandler:
+    def __init__(self, controller: SongController) -> None:
+        self.__blueprint = Blueprint("song", __name__)
+        self.__blueprint.add_url_rule(
+            "/create",
+            "create",
+            token_required(controller.create),
+            methods=["POST"],
+        )
+        self.__blueprint.add_url_rule(
+            "/update/<int:song_id>",
+            "update",
+            token_required(controller.update),
+            methods=["PUT"],
+        )
+        self.__blueprint.add_url_rule(
+            "/delete/<int:song_id>",
+            "delete",
+            token_required(controller.delete),
+            methods=["DELETE"],
+        )
+        self.__blueprint.add_url_rule(
+            "/get-all", "get_all", token_required(controller.get_all), methods=["GET"]
+        )
+        self.__blueprint.add_url_rule(
+            "/get-by-id/<int:song_id>",
+            "get_by_id",
+            token_required(controller.get_by_id),
+            methods=["GET"],
+        )
 
-    @blueprint.route("/create", methods=["POST"])
-    @token_required
-    def create(current_user):  # pragma: no cover
-        return controller.create(current_user, request)
-
-    @blueprint.route("/update/<int:song_id>", methods=["PUT"])
-    @token_required
-    def update(current_user, song_id):  # pragma: no cover
-        return controller.update(current_user, request, song_id)
-
-    @blueprint.route("/delete/<int:song_id>", methods=["DELETE"])
-    @token_required
-    def delete(current_user, song_id):  # pragma: no cover
-        return controller.delete(current_user, song_id)
-
-    @blueprint.route("/get-all", methods=["GET"])
-    @token_required
-    def get_all(_):
-        return controller.get_all(request)
-
-    @blueprint.route("/get-by-id/<int:song_id>", methods=["GET"])
-    @token_required
-    def get_by_id(_, song_id):
-        return controller.get_by_id(song_id)
-
-    return blueprint
+    @property
+    def blueprint(self) -> Blueprint:
+        return self.__blueprint

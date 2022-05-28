@@ -1,23 +1,22 @@
-from flask import Blueprint, request
+from flask import Blueprint
 
 from app.common.token import token_required
 from app.controllers.auth import AuthController
 
 
-def create_auth_handlers(controller: AuthController):
-    blueprint = Blueprint("auth", __name__)
+class AuthHandler:
+    def __init__(self, controller: AuthController) -> None:
+        self.__blueprint = Blueprint("auth", __name__)
+        self.__blueprint.add_url_rule(
+            "/login", "login", controller.login, methods=["POST"]
+        )
+        self.__blueprint.add_url_rule(
+            "/register", "register", controller.register, methods=["POST"]
+        )
+        self.__blueprint.add_url_rule(
+            "/profile", "profile", token_required(controller.profile), methods=["GET"]
+        )
 
-    @blueprint.route("/login", methods=["POST"])
-    def login():
-        return controller.login(request)
-
-    @blueprint.route("/register", methods=["POST"])
-    def register():
-        return controller.register(request)
-
-    @blueprint.route("/profile", methods=["GET"])
-    @token_required
-    def profile(current_user):
-        return controller.profile(current_user)
-
-    return blueprint
+    @property
+    def blueprint(self):
+        return self.__blueprint

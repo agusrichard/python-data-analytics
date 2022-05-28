@@ -1,6 +1,6 @@
 from typing import Tuple
 from http import HTTPStatus
-from flask import jsonify, Request, Response
+from flask import jsonify, Response, request
 
 from app.services.auth import AuthService
 from app.common.messages import EMAIL_PASSWORD_REQUIRED
@@ -11,7 +11,7 @@ class AuthController:
     def __init__(self, service: AuthService):
         self.service = service
 
-    def login(self, request: Request) -> Tuple[Response, int]:
+    def login(self) -> Tuple[Response, int]:
         data = request.json
         if "email" not in data or "password" not in data:
             return (
@@ -30,7 +30,7 @@ class AuthController:
         except BadRequestException as e:
             return jsonify(e.to_dict()), e.error_code
 
-    def register(self, request: Request) -> Tuple[Response, int]:
+    def register(self) -> Tuple[Response, int]:
         try:
             data = request.json
             self.service.register(data)

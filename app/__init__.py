@@ -18,7 +18,7 @@ def configure_auth(app: Flask, db: SQLAlchemy):
     from app.repositories.user import UserRepository
     from app.services.auth import AuthService
     from app.controllers.auth import AuthController
-    from app.handlers.auth import create_auth_handlers
+    from app.handlers.auth import AuthHandler
 
     register_shell_context("User", User)
 
@@ -26,22 +26,22 @@ def configure_auth(app: Flask, db: SQLAlchemy):
     user_repository = UserRepository(db)
     auth_service = AuthService(user_repository)
     auth_controller = AuthController(auth_service)
-    auth_handlers = create_auth_handlers(auth_controller)
-    app.register_blueprint(auth_handlers, url_prefix="/auth")
+    auth_handler = AuthHandler(auth_controller)
+    app.register_blueprint(auth_handler.blueprint, url_prefix="/auth")
 
 
 def configure_user(app: Flask, db: SQLAlchemy):
     from app.repositories.user import UserRepository
     from app.services.user import UserService
     from app.controllers.user import UserController
-    from app.handlers.user import create_user_handlers
+    from app.handlers.user import UserHandler
 
     # Configuring auth
     user_repository = UserRepository(db)
     user_service = UserService(user_repository)
     user_controller = UserController(user_service)
-    user_handlers = create_user_handlers(user_controller)
-    app.register_blueprint(user_handlers, url_prefix="/user")
+    user_handler = UserHandler(user_controller)
+    app.register_blueprint(user_handler.blueprint, url_prefix="/user")
 
 
 def configure_song(app: Flask, db: SQLAlchemy):
@@ -49,7 +49,7 @@ def configure_song(app: Flask, db: SQLAlchemy):
     from app.repositories.song import SongRepository
     from app.services.song import SongService
     from app.controllers.song import SongController
-    from app.handlers.song import create_song_handlers
+    from app.handlers.song import SongHandler
     from app.common.file import create_file_uploader
 
     register_shell_context("Song", Song)
@@ -59,8 +59,8 @@ def configure_song(app: Flask, db: SQLAlchemy):
     song_repository = SongRepository(db)
     song_service = SongService(app, song_repository, upload_file)
     song_controller = SongController(song_service)
-    song_handlers = create_song_handlers(song_controller)
-    app.register_blueprint(song_handlers, url_prefix="/song")
+    song_handler = SongHandler(song_controller)
+    app.register_blueprint(song_handler.blueprint, url_prefix="/song")
 
 
 def configure_playlist(app: Flask, db: SQLAlchemy):
