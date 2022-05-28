@@ -4,32 +4,37 @@ from app.common.token import token_required
 from app.controllers.user import UserController
 
 
-def create_user_handlers(controller: UserController):
-    blueprint = Blueprint("user", __name__)
+class UserHandler:
+    def __init__(self, controller: UserController) -> None:
+        self.__blueprint = Blueprint("user", __name__)
+        self.__blueprint.add_url_rule(
+            "/follow", "follow", token_required(controller.follow), methods=["POST"]
+        )
+        self.__blueprint.add_url_rule(
+            "/unfollow",
+            "unfollow",
+            token_required(controller.unfollow),
+            methods=["POST"],
+        )
+        self.__blueprint.add_url_rule(
+            "/get-followers",
+            "get_followers",
+            token_required(controller.get_followers),
+            methods=["GET"],
+        )
+        self.__blueprint.add_url_rule(
+            "/get-followed-users",
+            "get_followed_users",
+            token_required(controller.get_followed_users),
+            methods=["GET"],
+        )
+        self.__blueprint.add_url_rule(
+            "/get-songs-by-user-id/<int:user_id>",
+            "get_songs",
+            token_required(controller.get_songs),
+            methods=["GET"],
+        )
 
-    @blueprint.route("/follow", methods=["POST"])
-    @token_required
-    def follow(current_user):
-        return controller.follow(request, current_user)
-
-    @blueprint.route("/unfollow", methods=["POST"])
-    @token_required
-    def unfollow(current_user):
-        return controller.unfollow(request, current_user)
-
-    @blueprint.route("/get-followers", methods=["GET"])
-    @token_required
-    def get_followers(current_user):
-        return controller.get_followers(request, current_user)
-
-    @blueprint.route("/get-followed-users", methods=["GET"])
-    @token_required
-    def get_followed_users(current_user):
-        return controller.get_followed_users(request, current_user)
-
-    @blueprint.route("/get-songs-by-user-id/<int:user_id>", methods=["GET"])
-    @token_required
-    def get_songs(_, user_id):
-        return controller.get_songs(request, user_id)
-
-    return blueprint
+    @property
+    def blueprint(self) -> Blueprint:
+        return self.__blueprint

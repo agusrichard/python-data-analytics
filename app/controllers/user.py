@@ -1,18 +1,18 @@
 from typing import Tuple
 from http import HTTPStatus
-from flask import Request, Response, jsonify
-from app.common.messages import USER_ID_REQUIRED
-from app.common.exceptions import NotFoundException
+from flask import Response, jsonify, request
 
 from app.models.user import User
 from app.services.user import UserService
+from app.common.messages import USER_ID_REQUIRED
+from app.common.exceptions import NotFoundException
 
 
 class UserController:
     def __init__(self, service: UserService):
         self.service = service
 
-    def follow(self, request: Request, current_user: User) -> Tuple[Response, int]:
+    def follow(self, current_user: User) -> Tuple[Response, int]:
         try:
             user_id = request.args.get("user_id", None, int)
             if user_id is None:
@@ -24,7 +24,7 @@ class UserController:
         except NotFoundException as e:
             return jsonify(e.to_dict()), e.error_code
 
-    def unfollow(self, request: Request, current_user: User) -> Tuple[Response, int]:
+    def unfollow(self, current_user: User) -> Tuple[Response, int]:
         try:
             user_id = request.args.get("user_id", None, int)
             if user_id is None:
@@ -36,9 +36,7 @@ class UserController:
         except NotFoundException as e:
             return jsonify(e.to_dict()), e.error_code
 
-    def get_followers(
-        self, request: Request, current_user: User
-    ) -> Tuple[Response, int]:
+    def get_followers(self, current_user: User) -> Tuple[Response, int]:
         take = request.args.get("take", 10, int)
         skip = request.args.get("skip", 0, int)
 
@@ -48,9 +46,7 @@ class UserController:
             HTTPStatus.OK,
         )
 
-    def get_followed_users(
-        self, request: Request, current_user: User
-    ) -> Tuple[Response, int]:
+    def get_followed_users(self, current_user: User) -> Tuple[Response, int]:
         take = request.args.get("take", 10, int)
         skip = request.args.get("skip", 0, int)
 
@@ -60,7 +56,7 @@ class UserController:
             HTTPStatus.OK,
         )
 
-    def get_songs(self, request: Request, user_id: int) -> Tuple[Response, int]:
+    def get_songs(self, _, user_id: int) -> Tuple[Response, int]:
         take = request.args.get("take", 10, int)
         skip = request.args.get("skip", 0, int)
 

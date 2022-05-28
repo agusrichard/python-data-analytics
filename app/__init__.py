@@ -34,14 +34,14 @@ def configure_user(app: Flask, db: SQLAlchemy):
     from app.repositories.user import UserRepository
     from app.services.user import UserService
     from app.controllers.user import UserController
-    from app.handlers.user import create_user_handlers
+    from app.handlers.user import UserHandler
 
     # Configuring auth
     user_repository = UserRepository(db)
     user_service = UserService(user_repository)
     user_controller = UserController(user_service)
-    user_handlers = create_user_handlers(user_controller)
-    app.register_blueprint(user_handlers, url_prefix="/user")
+    user_handler = UserHandler(user_controller)
+    app.register_blueprint(user_handler.blueprint, url_prefix="/user")
 
 
 def configure_song(app: Flask, db: SQLAlchemy):
