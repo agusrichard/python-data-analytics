@@ -18,7 +18,7 @@ def configure_auth(app: Flask, db: SQLAlchemy):
     from app.repositories.user import UserRepository
     from app.services.auth import AuthService
     from app.controllers.auth import AuthController
-    from app.handlers.auth import create_auth_handlers
+    from app.handlers.auth import AuthHandler
 
     register_shell_context("User", User)
 
@@ -26,8 +26,8 @@ def configure_auth(app: Flask, db: SQLAlchemy):
     user_repository = UserRepository(db)
     auth_service = AuthService(user_repository)
     auth_controller = AuthController(auth_service)
-    auth_handlers = create_auth_handlers(auth_controller)
-    app.register_blueprint(auth_handlers, url_prefix="/auth")
+    auth_handler = AuthHandler(auth_controller)
+    app.register_blueprint(auth_handler.blueprint, url_prefix="/auth")
 
 
 def configure_user(app: Flask, db: SQLAlchemy):
